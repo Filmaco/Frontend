@@ -1,28 +1,12 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
-import TheWelcome from './components/TheWelcome.vue'
-import Cadastro from './components/autenticacao/Cadastro.vue';
-import EditUsuario from './components/user/EditUsuario.vue';
-import InativarUsuario from './components/user/InativarUsuario.vue';
+
+
 </script>
 
 <template>
-  <header>
-    <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
-
-    <div class="wrapper">
-      <Cadastro/>
-    </div>
-    <div class="wrapper">
-      <EditUsuario/>
-    </div>
-    <div class="wrapper">
-      <InativarUsuario/>
-    </div>
-  </header>
-
-  <main>
-  </main>
+  <div>
+    <router-view />
+  </div>
 </template>
 
 <style scoped>
