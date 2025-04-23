@@ -4,8 +4,13 @@
 </script>
 
 <template>
-  <div>
-   Inicial
+  <div class="flex bg-blue-500">
+    <div class="w-[250px] h-[100vh]">
+      menu lateral
+    </div>
+    <div class="w-[100%] bg-red-500">
+      <router-view />
+    </div>
   </div>
 </template>
 
