@@ -36,7 +36,7 @@ export default defineComponent({
         const response = await axios.get(`${URL}/usuarios`);
         console.log(response.data);
         
-        items = response.data.usuarios.map((item: any) => ({
+        items = response.data.map((item: any) => ({
           id: item.usuario_id,
           name: item.nome_completo,
           email: item.email,
