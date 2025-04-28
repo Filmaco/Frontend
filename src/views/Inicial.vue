@@ -4,16 +4,10 @@
 </script>
 
 <template>
-  <div class="flex">
-    <div class="w-[100px] h-[100vh] bg-[#7E57C2]">
-      menu lateral
-     alt="Tutorial" />
-
-    </div>
-    <div class="w-[100%]">
-      <router-view />
-    </div>
+  <div>
+   Home
   </div>
+  <router-view/>
 </template>
 
 <style scoped>

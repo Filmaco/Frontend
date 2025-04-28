@@ -1,11 +1,11 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import Home from '../components/views/Home.vue'
-import Inicial from '../components/views/Inicial.vue'
-import Cadastro from '../components/views/autenticacao/Cadastro.vue'
-import ListaUsuario from '@/components/views/admin/ListaUsuario.vue'
-import DefaultLayout from '@/components/views/DefualtLayout.vue'
-import Login from '@/components/views/autenticacao/Login.vue'
-import RedefinicaoSenha from '@/components/views/autenticacao/RedefinicaoSenha.vue'
+import Home from '@/views/Home.vue'
+import Inicial from '@/views/Inicial.vue'
+import Cadastro from '@/views/autenticacao/Cadastro.vue'
+import ListaUsuario from '@/views/admin/ListaUsuario.vue'
+import Login from '@/views/autenticacao/Login.vue'
+import RedefinicaoSenha from '@/views/autenticacao/RedefinicaoSenha.vue'
+import DefaultLayout from '@/views/DefaultLayout.vue'
 
 const routes = [
   {
@@ -17,6 +17,7 @@ const routes = [
       { path: '/usuarios', component: ListaUsuario },
     ]
   },
+  { path: '/auth', component: Inicial },
   { path: '/cadastro', component: Cadastro },
   { path: '/login', component: Login },
   { path: '/redefinir', component: () => RedefinicaoSenha,
