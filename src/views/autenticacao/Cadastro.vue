@@ -1,9 +1,11 @@
-<script>
+<script lang="ts">
 import axios from 'axios'
 import Button from '@/components/ui/button/Button.vue'
 import Input from '@/components/ui/input/Input.vue'
 import Separator from '@/components/ui/separator/Separator.vue'
 import { toast } from 'vue-sonner'
+import { defineComponent, ref, onMounted } from 'vue';
+import router from '@/routes'
 
 export default {
   components: {
@@ -14,23 +16,39 @@ export default {
   data() {
     return {
       usuario: {
+        nome_completo: 'Felix',
+        username: 'felix',
+        email: 'felix@gmail.com',
+        senha: '',
+        data_nascimento: '2005-08-18',
+        foto_perfil: null as File | null,
+        genero: 'masculino',
+        biografia: 'Gato',
+        tipo: 'comum'
+      },
+      confirmar_senha: '',
+      erros: {
         nome_completo: '',
         username: '',
         email: '',
         senha: '',
+        confirmar_senha: '',
         data_nascimento: '',
-        foto_perfil: null,
-        genero: '',
-        biografia: ''
       },
-      confirmar_senha: '',
-      erros: {},
       submit: false,
     }
   },
   methods: {
     validarCampos() {
-      this.erros = {}
+
+      this.erros = {
+        nome_completo: '',
+        username: '',
+        email: '',
+        senha: '',
+        confirmar_senha: '',
+        data_nascimento: ''
+      }
 
       if (!this.usuario.nome_completo) this.erros.nome_completo = 'Nome completo é obrigatório'
       if (!this.usuario.username) this.erros.username = 'Username é obrigatório'
@@ -42,14 +60,14 @@ export default {
       }
       if (!this.usuario.data_nascimento) this.erros.data_nascimento = 'Data de nascimento é obrigatória'
 
-      
       const senhaRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/
       if (this.usuario.senha && !senhaRegex.test(this.usuario.senha)) {
         this.erros.senha = 'Senha inválida. Deve conter pelo menos 8 caracteres, uma letra maiúscula e um número.'
       }
 
-      if (Object.keys(this.erros).length > 0) {
-        const mensagens = Object.values(this.erros).join(', ')
+      const errosAtivos = Object.values(this.erros).filter(erro => erro !== '')
+      if (errosAtivos.length > 0) {
+        const mensagens = errosAtivos.join(', ')
         toast.error('Campos obrigatórios com erro:', {
           description: mensagens,
           action: {
@@ -62,21 +80,51 @@ export default {
 
       return true
     },
-    async criarUsuario() {
-      this.submit = true
-      if (!this.validarCampos()) return
 
+    async criarUsuario() {
+      console.log('click 1');
+      
+      this.submit = true;
+      if (!this.validarCampos()) return;
+      console.log('click 2');
+
+      const formData = new FormData();
+      formData.append('nome_completo', this.usuario.nome_completo);
+      formData.append('email', this.usuario.email);
+      formData.append('senha', this.usuario.senha);
+      formData.append('username', this.usuario.username);
+      formData.append('data_nascimento', this.usuario.data_nascimento);
+      formData.append('genero', this.usuario.genero);
+      formData.append('biografia', this.usuario.biografia);
+      formData.append('tipo', this.usuario.tipo);
+      if (this.usuario.foto_perfil) {
+        formData.append('foto', this.usuario.foto_perfil as File);
+      }
+
+      console.log('click 3');
       try {
-        const response = await axios.post('http://localhost:8000/usuarios/add', this.usuario)
-        toast.success('Sucesso!', {
-          description: response.data.mensagem || 'Usuário criado com sucesso!'
-        })
+        const response = await axios.post('http://localhost:8000/usuarios/add', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data'
+          }
+        });
+
+        router.push({ name: 'Auth.Login' });
+        return response
       } catch (error) {
         toast.error('Erro ao criar usuário', {
           description: error || 'Tente novamente mais tarde.'
-        })
+        });
       }
-    }
+    },
+    handleFileChange(event: Event) {
+      const target = event.target as HTMLInputElement
+      const files = target?.files
+      if (files && files.length > 0) {
+        this.usuario.foto_perfil = files[0]
+      }
+    },
+
   }
 }
 </script>
@@ -120,7 +168,13 @@ export default {
          <Input v-model="usuario.biografia" placeholder="Biografia" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
        </div>
 
-       <Button class="w-full mt-[20px] radius text-lg bg-purple-800" style="border-radius: 60px; height: 40px;">Cadastrar</Button>
+       <div>
+        <Input type="file" @change="handleFileChange" />
+
+
+       </div>
+
+       <Button class="w-full mt-[20px] radius text-lg bg-purple-800" style="border-radius: 60px; height: 40px;"  >Cadastrar</Button>
      </form>
 
        <!--Separator class="mb-[40px] text-base w-[50%]" label="Ou continue com" />
@@ -139,10 +193,13 @@ export default {
          </div>
        </div-->
 
-       <p>Ja tem uma conta? <a src="#" class="text-purple-600" style="cursor: pointer;">Entre.</a></p>
+       <p>Ja tem uma conta? <RouterLink to="/login" class="text-purple-600">Entre</RouterLink>
+      
+      </p>
+
      </div>
      <div class="w-[50%] bg-purple-400 mx-7 my-10 flex justify-center items-center" style="border-radius: 30px;">
-        <img src="../../../assets/imagens/tutorial-2_1.png" style="width: 100%; height: 80%;" />
+        <img src="../../assets/imagens/tutorial_2.svg" style="width: 100%; height: 80%;" />
      </div>
   </div>
 </template>

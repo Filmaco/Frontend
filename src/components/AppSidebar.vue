@@ -12,6 +12,11 @@ import {
   SidebarHeader,
   SidebarRail,
 } from '@/components/ui/sidebar'
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from '@/components/ui/avatar'
 
 import {
   AudioWaveform,
@@ -24,7 +29,25 @@ import {
   PieChart,
   Settings2,
   SquareTerminal,
+  Home,
+  Star,
+  Users,
+  Bell,
+  BellDot,
+  CircleUser,
+  Clock9,
+  Compass,
+  Drama,
+  Flame,
+  Music4,
+  Clapperboard,
+  Gamepad,
+  Trophy,
+  GraduationCap,
+  Podcast,
+  
 } from 'lucide-vue-next'
+import RioImage from '@/assets/imagens/rio.jpg'
 
 const props = withDefaults(defineProps<SidebarProps>(), {
   collapsible: 'icon',
@@ -32,147 +55,95 @@ const props = withDefaults(defineProps<SidebarProps>(), {
 
 // This is sample data.
 const data = {
+  
   user: {
-    name: 'shadcn',
+    name: 'Rio Vidal',
     email: 'm@example.com',
-    avatar: '/avatars/shadcn.jpg',
+    avatar: RioImage,
   },
-  teams: [
-    {
-      name: 'Acme Inc',
-      logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
-    },
-    {
-      name: 'Acme Corp.',
-      logo: AudioWaveform,
-      plan: 'Startup',
-    },
-    {
-      name: 'Evil Corp.',
-      logo: Command,
-      plan: 'Free',
-    },
-  ],
   navMain: [
     {
-      title: 'Playground',
+      title: 'Explorar',
       url: '#',
-      icon: SquareTerminal,
-      isActive: true,
+      icon: Compass,
+      isActive: false,
       items: [
         {
-          title: 'History',
+          title: 'Musica',
           url: '#',
+          icon: Music4,
         },
         {
-          title: 'Starred',
+          title: 'Filme',
           url: '#',
+          icon: Clapperboard,
         },
         {
-          title: 'Settings',
+          title: 'Jogos',
           url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Models',
-      url: '#',
-      icon: Bot,
-      items: [
-        {
-          title: 'Genesis',
-          url: '#',
+          icon: Gamepad,
         },
         {
-          title: 'Explorer',
+          title: 'Esportes',
           url: '#',
+          icon: Trophy,
         },
         {
-          title: 'Quantum',
+          title: 'Cursos',
           url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Documentation',
-      url: '#',
-      icon: BookOpen,
-      items: [
-        {
-          title: 'Introduction',
-          url: '#',
+          icon: GraduationCap,
         },
         {
-          title: 'Get Started',
+          title: 'Podcasts',
           url: '#',
-        },
-        {
-          title: 'Tutorials',
-          url: '#',
-        },
-        {
-          title: 'Changelog',
-          url: '#',
-        },
-      ],
-    },
-    {
-      title: 'Settings',
-      url: '#',
-      icon: Settings2,
-      items: [
-        {
-          title: 'General',
-          url: '#',
-        },
-        {
-          title: 'Team',
-          url: '#',
-        },
-        {
-          title: 'Billing',
-          url: '#',
-        },
-        {
-          title: 'Limits',
-          url: '#',
+          icon: Podcast,
         },
       ],
     },
   ],
   projects: [
     {
-      name: 'Design Engineering',
-      url: '#',
-      icon: Frame,
+      name: 'Inicio',
+      url: '/',
+      icon: Home,
     },
     {
-      name: 'Sales & Marketing',
+      name: 'Favoritos',
       url: '#',
-      icon: PieChart,
+      icon: Star,
     },
     {
-      name: 'Travel',
+      name: 'Seguindo',
       url: '#',
-      icon: Map,
+      icon: Users,
+    },
+    {
+      name: 'Videos',
+      url: '#',
+      icon: Users,
+    },
+    {
+      name: 'Listas',
+      url: '#',
+      icon: Users,
     },
   ],
 }
 </script>
 
 <template>
-  <Sidebar v-bind="props">
-    <SidebarHeader>
-      <TeamSwitcher :teams="data.teams" />
-    </SidebarHeader>
-    <SidebarContent>
-      <NavMain :items="data.navMain" />
-      <NavProjects :projects="data.projects" />
-    </SidebarContent>
-    <SidebarFooter>
-      <NavUser :user="data.user" />
-    </SidebarFooter>
-    <SidebarRail />
-  </Sidebar>
+  <div class="flex">
+    <Sidebar v-bind="props" class="flex" style="">
+      <SidebarHeader>
+        <span>LOGO</span>
+      </SidebarHeader>
+      <SidebarContent>
+        <NavProjects :projects="data.projects" />
+        <NavMain :items="data.navMain" />
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
+
+  </div>
 </template>
+

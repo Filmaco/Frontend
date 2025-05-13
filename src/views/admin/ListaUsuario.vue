@@ -36,15 +36,17 @@ export default defineComponent({
         const response = await axios.get(`${URL}/usuarios`);
         console.log(response.data);
         
-        items = response.data.map((item: any) => ({
+        items = response.data.usuarios.map((item: any) => ({
           id: item.usuario_id,
           name: item.nome_completo,
           email: item.email,
           status: item.status
         }));
+                console.log("items: ", items);
+
         return items;
       } catch (error) {
-        alert('Erro ao listar usuários.');
+        //alert('Erro ao listar usuários.');
         console.error(error);
       }
     },
@@ -70,7 +72,7 @@ export default defineComponent({
 
 
 <template>
-    <main class="pb-16 pt-24 px-5 full w-full h-full">
+    <main class="pb-16 pt-20 px-5 full w-full h-full flex justify-center content-center">
       <DataTable :data="data" :columns="columns" @handle-click-get-id="handleClickAndRedirectToClientePage" />
     </main>
   </template>

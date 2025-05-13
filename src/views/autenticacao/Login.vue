@@ -4,6 +4,8 @@ import Button from '@/components/ui/button/Button.vue'
 import Input from '@/components/ui/input/Input.vue'
 import Separator from '@/components/ui/separator/Separator.vue'
 import { toast } from 'vue-sonner'
+import { UserService } from '@/services/user.service'
+import router from '@/routes'
 
 export default {
   components: {
@@ -14,8 +16,11 @@ export default {
   data() {
     return {
       usuario: {
-        email: '',
-        senha: '',
+        //Admin
+        //email: 'laratrabalhos83@gmail.com',
+        //user padrao 
+        email: 'tilara.cloud@gmail.com',
+        senha: 'Senha123@',
       },
       confirmar_senha: '',
       erros: {},
@@ -38,14 +43,12 @@ export default {
         if (!this.validarCampos()) return
 
         try {
-            const response = await axios.post('http://localhost:8000/usuarios/login', this.usuario)
-            const token = response.data.token
+            const response = await UserService.login(this.usuario.email, this.usuario.senha)
+           
+            router.push({ name: 'Home' });
+            //window.location.reload();
 
-            localStorage.setItem('token', token)
-
-            toast.success('Login realizado!', {
-            description: 'Você foi autenticado com sucesso!'
-            })
+            return response
 
         } catch (error) {
           this.mensagem = true;
@@ -80,10 +83,10 @@ export default {
         <Button class="w-full mt-[20px] radius text-lg bg-purple-800" style="border-radius: 60px; height: 40px;">Entrar</Button>
         </form>
 
-       <p>Nao tem uma conta? <a src="http://localhost:5173/cadastro" class="text-purple-600" style="cursor: pointer;">Cadastre-se.</a></p>
+       <p>Nao tem uma conta?<RouterLink to="/cadastro" class="text-purple-600">Cadastre-se.</RouterLink></p>
      </div>
      <div class="w-[50%] bg-purple-400 mx-7 my-10 flex justify-center items-center" style="border-radius: 30px;">
-        <img src="../../../assets/imagens/tutorial-1.png" style="width: 100%; height: 80%;" />
+        <img src="../../assets/imagens/tutorial_3.svg" style="width: 100%; height: 80%;" />
      </div>
   </div>
 </template>

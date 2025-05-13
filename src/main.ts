@@ -1,8 +1,8 @@
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './routes/router'
 import './assets/main.css'
-import axios from 'axios' // 👉 importa o axios
+import axios from 'axios'
+import router from './routes'
 
 const app = createApp(App)
 

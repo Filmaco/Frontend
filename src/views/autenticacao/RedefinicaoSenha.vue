@@ -1,165 +1,155 @@
-<template>
-  <div class="password-reset-container">
-    <!-- Seção de Solicitação de Reset -->
-    <div v-if="!showResetForm" class="request-section">
-      <h2>Esqueceu sua senha?</h2>
-      <p>Digite seu email para receber o link de redefinição</p>
-      <input 
-        v-model="email" 
-        type="email" 
-        placeholder="Seu email cadastrado" 
-        
-      />
-      <button @click="handleSendResetEmail" :disabled="loading">
-        {{ loading ? 'Enviando...' : 'Enviar Link' }}
-      </button>
-      <p v-if="message" :class="messageClass">{{ message }}</p>
-    </div>
+<script lang="ts">
+ 
+ import { sendEmail } from '@/services/email.service';
+import FormInput from '@/components/FormInput.vue';
+import FormText from '@/components/FormText.vue';
+import { defineComponent } from 'vue';
+import Button from '@/components/ui/button/Button.vue'; 
 
-    <!-- Seção de Redefinição de Senha -->
-    <div v-else class="reset-section">
-      <h2>Redefinir Senha</h2>
-      <input 
-        v-model="newPassword" 
-        type="password" 
-        placeholder="Nova senha (mínimo 6 caracteres)" 
-      />
-      <input 
-        v-model="confirmPassword" 
-        type="password" 
-        placeholder="Confirme sua nova senha" 
-      />
-      <button @click="handleResetPassword" :disabled="loading">
-        {{ loading ? 'Processando...' : 'Redefinir Senha' }}
-      </button>
-      <p v-if="message" :class="messageClass">{{ message }}</p>
+
+export default defineComponent({
+  components: {
+    FormInput,
+    FormText,
+    Button,
+  },
+  data() {
+    return {
+      title: "Contact Us",
+      showForm: true,
+      successMessage: "",
+      contactForm: {
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+        file: null,
+      },
+      errors: {
+        name: "",
+        email: "",
+        subject: "",
+        message: "",
+      },
+    };
+  },
+  computed: {
+    isFormValid() {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      return (
+        this.contactForm.name.trim() &&
+        emailRegex.test(this.contactForm.email) &&
+        this.contactForm.subject.trim() &&
+        this.contactForm.message.trim()
+      );
+    }
+  },
+  methods: {
+    setTouched(field) {
+      // Validação simples (você pode melhorar)
+      if (!this.contactForm[field]) {
+        this.errors[field] = "This field is required.";
+      } else {
+        this.errors[field] = "";
+      }
+    },
+    onFileSelected(event) {
+      this.contactForm.file = event.target.files[0];
+    },
+    async onSubmit() {
+      if (this.isFormValid) {
+        const formData = new FormData();
+        formData.append('name', this.contactForm.name);
+        formData.append('email', this.contactForm.email);
+        formData.append('subject', this.contactForm.subject);
+        formData.append('message', this.contactForm.message);
+        // formData.append('file', this.contactForm.file, this.contactForm.file.name);
+
+        try {
+          const response = await sendEmail(formData);
+          if (response.status === 200) {
+            this.successMessage = response.data.message;
+            this.showForm = false;
+          } else {
+            console.error('Failed to send email:', response);
+          }
+        } catch (error) {
+          console.error('Error sending email:', error);
+        }
+      } else {
+        console.log('Form is not valid');
+      }
+    }
+
+  },
+});
+</script>
+
+
+<template>
+  <div class="container-fluid w-25">
+    <div class="row justify-content-center align-items-center min-vh-100">
+      <form v-if="showForm" @submit.prevent="onSubmit" enctype="multipart/form-data">
+        <h2 class="mb-4">{{ title }}</h2>
+
+        <FormInput
+          label="Name"
+          v-model="contactForm.name"
+          :error="errors.name"
+          placeholder="Your name"
+          @input="setTouched('name')"
+        />
+
+        <FormInput
+          label="Subject"
+          v-model="contactForm.subject"
+          :error="errors.subject"
+          placeholder="Subject"
+          @input="setTouched('subject')"
+        />
+
+        <FormInput
+          type="email"
+          label="Email"
+          v-model="contactForm.email"
+          :error="errors.email"
+          placeholder="youremail@example.com"
+          @input="setTouched('email')"
+        />
+
+        <FormText
+          label="Message"
+          v-model="contactForm.message"
+          :error="errors.message"
+          rows="4"
+          @input="setTouched('message')"
+        />
+
+        <!--div class="form-group mb-3">
+          <label for="file">Attachment (PDF, JPG, PNG only)</label>
+          <input
+            type="file"
+            class="form-control"
+            id="file"
+            @change="onFileSelected"
+            accept=".pdf, .jpg, .jpeg, .png"
+          />
+        </div-->
+
+        <div class="d-flex justify-content-end">
+          <Button
+            type="submit"
+            class="btn btn-primary mt-3"
+            
+          >
+            Send email
+          </Button>
+        </div>
+      </form>
+
+      <div v-if="!showForm" class="alert alert-success">
+        {{ successMessage }}
+      </div>
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { useRoute } from 'vue-router';
-import { 
-  auth, 
-  sendPasswordResetEmail, 
-  confirmPasswordReset 
-} from '@/utils/firebase';
-
-export default {
-  setup() {
-    const route = useRoute();
-    const email = ref('');
-    const newPassword = ref('');
-    const confirmPassword = ref('');
-    const message = ref('');
-    const loading = ref(false);
-    const showResetForm = ref(false);
-    const actionCode = ref('');
-
-    // Verifica se há um código de reset na URL
-    onMounted(() => {
-      actionCode.value = route.query.oobCode as string;
-      showResetForm.value = !!actionCode.value;
-    });
-
-    const messageClass = computed(() => ({
-      'error-message': message.value.includes('Erro') || message.value.includes('inválido'),
-      'success-message': message.value.includes('sucesso')
-    }));
-
-    const handleSendResetEmail = async () => {
-      if (!email.value) {
-        message.value = 'Por favor, insira um email válido';
-        return;
-      }
-
-      loading.value = true;
-      try {
-        await sendPasswordResetEmail(auth, email.value);
-        message.value = 'Email enviado com sucesso! Verifique sua caixa de entrada.';
-      } catch (error) {
-        message.value = 'Erro ao enviar email. Verifique o endereço e tente novamente.';
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    const handleResetPassword = async () => {
-      if (newPassword.value !== confirmPassword.value) {
-        message.value = 'As senhas não coincidem!';
-        return;
-      }
-
-      if (newPassword.value.length < 6) {
-        message.value = 'A senha deve ter no mínimo 6 caracteres.';
-        return;
-      }
-
-      loading.value = true;
-      try {
-        await confirmPasswordReset(auth, actionCode.value, newPassword.value);
-        message.value = 'Senha redefinida com sucesso! Você pode fazer login agora.';
-      } catch (error) {
-        message.value = 'Erro ao redefinir senha. O link pode ter expirado.';
-      } finally {
-        loading.value = false;
-      }
-    };
-
-    return {
-      email,
-      newPassword,
-      confirmPassword,
-      message,
-      loading,
-      showResetForm,
-      messageClass,
-      handleSendResetEmail,
-      handleResetPassword
-    };
-  }
-};
-</script>
-
-<style scoped>
-.password-reset-container {
-  max-width: 400px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.request-section, .reset-section {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-input {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-button {
-  padding: 12px;
-  background-color: #42b983;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-button:disabled {
-  background-color: #cccccc;
-  cursor: not-allowed;
-}
-
-.error-message {
-  color: #ff4444;
-}
-
-.success-message {
-  color: #00C851;
-}
-</style>

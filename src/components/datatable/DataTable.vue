@@ -112,7 +112,7 @@ const handleClickId = (data: TData) => {
 </script>
 
 <template>
-  <div class="w-full border bg-white p-10">
+  <div class="w-full border bg-white p-10" style="border-radius: 20px;">
     <div class="flex gap-2 items-center py-4">
       <Input
         class="max-w-sm"
@@ -122,7 +122,7 @@ const handleClickId = (data: TData) => {
       />
      
     </div>
-    <div class="rounded-md border">
+    <div class="rounded-md border" style="border-radius: 20px;">
       <Table>
           <TableHeader>
             <TableRow v-for="headerGroup in table.getHeaderGroups()" :key="headerGroup.id">

@@ -15,6 +15,9 @@ import {
   SidebarMenuSubItem,
 } from '@/components/ui/sidebar'
 import { ChevronRight, type LucideIcon } from 'lucide-vue-next'
+import DynamicIcon from './DynamicIcon.vue'
+
+const iconSize = 50
 
 defineProps<{
   items: {
@@ -25,6 +28,7 @@ defineProps<{
     items?: {
       title: string
       url: string
+      icon?: LucideIcon
     }[]
   }[]
 }>()
@@ -32,36 +36,27 @@ defineProps<{
 
 <template>
   <SidebarGroup>
-    <SidebarGroupLabel>Platform</SidebarGroupLabel>
     <SidebarMenu>
-      <Collapsible
-        v-for="item in items"
-        :key="item.title"
-        as-child
-        :default-open="item.isActive"
-        class="group/collapsible"
-      >
-        <SidebarMenuItem>
-          <CollapsibleTrigger as-child>
-            <SidebarMenuButton :tooltip="item.title">
-              <component :is="item.icon" v-if="item.icon" />
-              <span>{{ item.title }}</span>
-              <ChevronRight class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+      <SidebarMenuItem v-for="item in items" :key="item.title">
+            <SidebarMenuButton as-child>
+              <a  class="font-medium text-white">
+                <component :is="item.icon" v-if="item.icon" style="width: 20px; height: 20px; "/>
+                <span style="">{{ item.title }}</span>
+              </a>
             </SidebarMenuButton>
-          </CollapsibleTrigger>
-          <CollapsibleContent>
-            <SidebarMenuSub>
-              <SidebarMenuSubItem v-for="subItem in item.items" :key="subItem.title">
-                <SidebarMenuSubButton as-child>
-                  <a :href="subItem.url">
-                    <span>{{ subItem.title }}</span>
+            <SidebarMenuSub >
+              <SidebarMenuSubItem v-for="childItem in item.items" :key="childItem.title">
+                <SidebarMenuSubButton as-child >
+                 
+                  <a :href="childItem.url">
+                    <component :is="childItem.icon" v-if="childItem.icon" style="width: 20px; height: 20px; "/>
+                    <span class="">{{ childItem.title }}</span>
                   </a>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             </SidebarMenuSub>
-          </CollapsibleContent>
-        </SidebarMenuItem>
-      </Collapsible>
+          </SidebarMenuItem>
+     
     </SidebarMenu>
   </SidebarGroup>
 </template>
