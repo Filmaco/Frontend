@@ -42,6 +42,27 @@ const VideoService = new class{
             })  
     }
 
+     public editarVideo(id: string, dados: FormData) {
+        return new Promise<any>((resolve, reject) => {
+            axios
+            .put(`${API_URL}/editar/${id}`, dados, {
+                headers: {
+                'Content-Type': 'multipart/form-data',
+                },
+            })
+            .then((response) => resolve(response.data))
+            .catch((error: AxiosError) => reject(error));
+        });
+    }
+
+    public buscarPorId(id: string) {
+        return new Promise<any>((resolve, reject) => {
+            axios.get(`${API_URL}/${id}`)
+                .then((response) => resolve(response.data))
+                .catch((error: AxiosError) => reject(error));
+        });
+    }
+
 }
 
 

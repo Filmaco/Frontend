@@ -42,7 +42,7 @@ export default defineComponent({
           email: item.email,
           status: item.status
         }));
-                console.log("items: ", items);
+        console.log("items: ", items);
 
         return items;
       } catch (error) {

@@ -172,7 +172,7 @@ import Separator from '@/components/ui/separator/Separator.vue';
                 <Trash2/>
               </div>
           </div-->
-          <div class="flex flex-row">
+          <!-- <div class="flex flex-row">
             <div>
               <p>45</p>
               <p>45</p>
@@ -191,7 +191,7 @@ import Separator from '@/components/ui/separator/Separator.vue';
               <p>45</p>
               <p>45</p>
             </div>
-          </div>
+          </div> -->
         </div>
 
       </div>
@@ -219,7 +219,7 @@ import Separator from '@/components/ui/separator/Separator.vue';
               Conta
             </TabsTrigger>
             <TabsTrigger value="password">
-              Password
+              Senha
             </TabsTrigger>
           </TabsList>
           <TabsContent value="account">

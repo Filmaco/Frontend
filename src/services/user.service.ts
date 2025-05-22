@@ -80,7 +80,7 @@ const UserService = new class {
 
   public async getUserByName(nome_completo:string): Promise<any> {
     try {
-      const response = await axios.get(`${API_URL}/usuarios/${nome_completo}`)
+      const response = await axios.get(`${API_URL}/usuarios/nome/${nome_completo}`)
       return response.data.usuario.usuario;
     }
     catch (error) {
@@ -94,7 +94,7 @@ const UserService = new class {
   public async getUserById(id:number): Promise<any> {
     try {
       const response = await axios.get(`${API_URL}/usuarios/${id}`)
-      return response.data;
+      return response.data.usuario.usuario;
     }
     catch (error) {
       if (axios.isAxiosError(error)) {

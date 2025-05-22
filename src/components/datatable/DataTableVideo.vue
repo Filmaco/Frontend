@@ -144,7 +144,7 @@ const inativeVideo = (data: TData) => {
           <TableBody>
             <template v-if="table.getRowModel().rows?.length">
               <template v-for="row in table.getRowModel().rows" :key="row.id">
-                  <TableRow :data-state="row.getIsSelected() && 'selected'" @click="handleClickId(row.original)">
+                  <TableRow :data-state="row.getIsSelected() && 'selected'" @click="handleClickId(row.original)" style="cursor:pointer;">
                     <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
                       <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                     </TableCell>

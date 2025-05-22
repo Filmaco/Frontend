@@ -11,7 +11,9 @@ import PerfilUsuario from '@/views/user/PerfilUsuario.vue'
 import Video from '@/views/videos/Video.vue'
 import EditUsuario from '@/views/user/EditUsuario.vue'
 import MeusVideos from '@/views/user/MeusVideos.vue'
-import MeusVideos from '@/views/user/MeusVideos.vue'
+import ListaPlaylists from "@/views/playlist/ListaPlaylists.vue";
+import Playlist from '@/views/playlist/Playlist.vue'
+import EditarPlaylist from '@/views/playlist/EditarPlaylist.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -56,7 +58,7 @@ const routes: Array<RouteRecordRaw> = [
         }
       },
       {
-        path: 'editar:id',
+        path: 'editar/:id',
         name: 'Usuario.Editar',
         component: EditUsuario,
         meta: {
@@ -68,7 +70,28 @@ const routes: Array<RouteRecordRaw> = [
         component: MeusVideos,
         meta: {
         }
-      }
+      },
+      {
+        path: 'playlists',
+        name: 'Playlist',
+        component: ListaPlaylists,
+        meta: {
+        }
+      },
+      {
+        path: 'playlist/:id',
+        name: 'Playlist.Id',
+        component: Playlist,
+        meta: {
+        }
+      },
+       {
+        path: 'playlist/editar/:id',
+        name: 'Playlist.Editar',
+        component: EditarPlaylist,
+        meta: {
+        }
+      },
     ]
   },
   {

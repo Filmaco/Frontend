@@ -52,7 +52,14 @@ export default {
 
       if (!this.usuario.nome_completo) this.erros.nome_completo = 'Nome completo é obrigatório'
       if (!this.usuario.username) this.erros.username = 'Username é obrigatório'
-      if (!this.usuario.email) this.erros.email = 'Email é obrigatório'
+      if (!this.usuario.email) {
+        this.erros.email = 'Email é obrigatório'
+      } else {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        if (!emailRegex.test(this.usuario.email)) {
+          this.erros.email = 'Formato de e-mail inválido'
+        }
+      }
       if (!this.usuario.senha) this.erros.senha = 'Senha é obrigatória'
       if (!this.confirmar_senha) this.erros.confirmar_senha = 'Confirmação de senha é obrigatória'
       if (this.usuario.senha && this.confirmar_senha && this.usuario.senha !== this.confirmar_senha) {
@@ -170,8 +177,6 @@ export default {
 
        <div>
         <Input type="file" @change="handleFileChange" />
-
-
        </div>
 
        <Button class="w-full mt-[20px] radius text-lg bg-purple-800" style="border-radius: 60px; height: 40px;"  >Cadastrar</Button>

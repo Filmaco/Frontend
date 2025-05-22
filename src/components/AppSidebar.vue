@@ -123,8 +123,8 @@ const data = {
       icon: Users,
     },
     {
-      name: 'Listas',
-      url: '#',
+      name: 'Playlists',
+      url: '/playlists',
       icon: Users,
     },
   ],

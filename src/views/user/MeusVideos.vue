@@ -6,6 +6,44 @@ import router from '@/routes';
 import columns from '@/components/datatable/video.table';
 import { Data } from '@/components/datatable/data.videos';
 import DataTableVideo from '@/components/datatable/DataTableVideo.vue';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from '@/components/ui/sidebar'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog'
+import Separator from "@/components/ui/separator/Separator.vue";
+import Switch from "@/components/ui/switch/Switch.vue";
+import { Button } from '@/components/ui/button'
+import EditarVideo from '../videos/EditarVideo.vue';
 
 interface Video {
     id: number,
@@ -17,9 +55,37 @@ interface Video {
     status: 'ativo' | 'inativo'
 }
 
+
+
 export default defineComponent({
     components: {
         DataTableVideo,
+        AlertDialog,
+        AlertDialogAction,
+        AlertDialogCancel,
+        AlertDialogContent,
+        AlertDialogDescription,
+        AlertDialogFooter,
+        AlertDialogHeader,
+        AlertDialogTitle,
+        AlertDialogTrigger,
+        Button,
+        Separator,
+        DropdownMenu,
+        DropdownMenuContent,
+        DropdownMenuGroup,
+        DropdownMenuItem,
+        DropdownMenuLabel,
+        DropdownMenuSeparator,
+        DropdownMenuTrigger,
+        Card,
+        CardContent,
+        CardDescription,
+        CardFooter,
+        CardHeader,
+        CardTitle,
+        Switch,
+        EditarVideo,
     },
     data() {
         return {
@@ -36,7 +102,9 @@ export default defineComponent({
                 },
             videos: [] as Video[],
             columns,
-            data: [] as Data[]
+            data: [] as Data[],
+            isDialogOpen: false,
+            videoIdSelecionado: null as number | null,
         }
     },
     async mounted() {  
@@ -71,6 +139,8 @@ export default defineComponent({
         },
         async goToPageVideWithId(id:number) {
             //router.push({ name: 'Video.Visualizar', params: { id } })
+            this.videoIdSelecionado = id;
+            this.isDialogOpen = true;
         },
         async inativeVideo(id:number) {
             console.log('video ', id, ' inativado');
@@ -151,6 +221,20 @@ export default defineComponent({
         <div class="mt-10">
             <p class="text-xl font-semibold mb-4">Meus Vídeos</p>
             <DataTableVideo :data="data" :columns="columns" @handle-click-get-id="goToPageVideWithId" @inative-video="inativeVideo"/>
+
+            <AlertDialog v-model:open="isDialogOpen">
+                <AlertDialogContent class="max-w-[900px]">
+                    <div class="w-full flex justify-between">
+                    <p class="text-2xl mb-5 ml-2">Detalhes do vídeo</p>
+                    <AlertDialogCancel class="border-0 bg-transparent w-[10px]">X</AlertDialogCancel>
+                    </div>
+
+                    <Separator orientation="horizontal" class="w-[95%] ml-[-7px]" />
+                    <EditarVideo :video-id="videoIdSelecionado" />
+                    
+                </AlertDialogContent>
+                </AlertDialog>
+
         </div>
     </div>
 </template>

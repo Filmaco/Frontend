@@ -17,9 +17,9 @@ export default {
     return {
       usuario: {
         //Admin
-        //email: 'laratrabalhos83@gmail.com',
+        email: 'laratrabalhos83@gmail.com',
         //user padrao 
-        email: 'tilara.cloud@gmail.com',
+        // email: 'tilara.cloud@gmail.com',
         senha: 'Senha123@',
       },
       confirmar_senha: '',

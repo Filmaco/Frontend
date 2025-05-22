@@ -29,7 +29,7 @@ import {
 } from '@/components/ui/select'
 import { defineComponent } from 'vue';
 import rio from '@/assets/imagens/rio.jpg'
-import { SquarePenIcon, Trash, Trash2, LucideEdit } from 'lucide-vue-next';
+import { SquarePenIcon, Trash, Trash2, LucideEdit, ListVideo } from 'lucide-vue-next';
 import { UserService } from '@/services/user.service';
 import Separator from '@/components/ui/separator/Separator.vue';
 import { VideoService } from '@/services/video.service';
@@ -39,6 +39,7 @@ import {
   AvatarFallback,
   AvatarImage,
 } from '@/components/ui/avatar'
+import { PlaylistService } from '@/services/playlist.service';
   
 interface Video {
   id: number;
@@ -50,6 +51,13 @@ interface Video {
   nome_usuario: string
 }
 
+
+interface Playlist {
+    playlist_id: number,
+    titulo: string,
+    imagem: string,
+    status: string
+}
 
   export default defineComponent({
     components:{
@@ -68,6 +76,7 @@ interface Video {
       rio,
       SquarePenIcon,
       Trash2,
+      ListVideo,
       Select,
       SelectContent,
       SelectGroup,
@@ -84,6 +93,7 @@ interface Video {
     },
     data() {
       return {
+        userIdPerfil: 0,
         usuario: {
           usuario_id: 0,
           nome_completo: '',
@@ -102,28 +112,48 @@ interface Video {
         defaultImg: '/img/default-user.jpg',
         seguindo: false,
         videos: [] as Video[],
+        playlists: [] as Playlist[],
         id: 0,
+        editar: false,
       };
     },
     async mounted() { 
      
+        // pegar o id da rota e id pelo token
         try {
-         const id = parseInt(this.$route.params.id as string);
-        this.id = id;
-        console.log('user:', this.usuario);
-        const response = await UserService.getUserById(this.id);
-        this.usuario = response;
-        console.log('user:', this.usuario);
-        
-
+          const id = parseInt(this.$route.params.id as string);
+          this.id = id;
+          
+          const response = await UserService.getUserById(Number(this.id));
+          this.usuario = response;
           this.videos = await this.getVideosById(this.id);
+
+          const item = await UserService.perfil();
+          this.userIdPerfil = item.usuario.usuario_id
+          console.log(item);
+          
+          
+          this.ButtonEditar()
+          this.playlists = await this.loadPlaylist(this.playlists)
+
         } catch (e) {
           console.log('Erro ao buscar perfil:', e);
-           router.push({ name: 'Home' })
+          router.push({ name: 'Home' })
         }
 
+        
     },
     methods: {
+      async loadUser(item:number) {
+        try {
+           
+            return item;
+
+        } catch (error) {
+        console.error('Erro ao pegar informacoes do usuario:', error);
+      }
+      },
+
       handleFollow() {
         this.seguindo = !this.seguindo;
       },
@@ -148,14 +178,59 @@ interface Video {
         }
       },
 
-    async goToPageVideWithId(id:number) {
-      router.push({ name: 'Video.Visualizar', params: { id } })
-    },
-     async goToPerfilWithId(name:string) {
-        const response = UserService.getUserByName(name);
-        return response;
-      
-    }
+      async goToPageVideWithId(id:number) {
+        router.push({ name: 'Playlist.Id', params: { id } })
+      },
+
+      async goToPerfilWithId(name:string) {
+          const response = UserService.getUserByName(name);
+          return response;
+        
+      },
+
+      ButtonEditar() {
+          if(this.userIdPerfil == this.usuario.usuario_id) {
+            this.editar = true;
+            console.log("true",this.editar, ' - ', ' - ', this.userIdPerfil, this.usuario.usuario_id);
+            
+          }
+          else { 
+            this.editar = false;
+              console.log("false",this.editar, ' - ', ' - ', this.userIdPerfil, this.usuario.usuario_id);
+           }
+      },
+
+      goTo() {
+        router.push(`/editar/${this.userIdPerfil}`)
+      },
+
+      async loadPlaylist(items:any) {
+            
+            try {
+                const response = await PlaylistService.listarPlaylistsPorUsuario(this.usuario.usuario_id)
+                console.log(response);
+                
+                 items = response.data.map((item:any) => ({
+                    playlist_id: item.playlist_id,
+                    titulo: item.titulo,
+                    imagem: item.imagem,
+                    status: item.status
+                }))
+                console.log(items);
+                
+                return items;
+
+            } catch (error) {
+                console.error(error);
+            }
+
+      },
+
+      async statusDefine(status: string) {
+        if (status == "ativo") {
+          return
+        }
+      }
     }
   });
   </script>
@@ -206,16 +281,24 @@ interface Video {
           </div>
         </div>
 
-        <div v-if="seguindo" class="flex mt-10">
-          <Button class="bg-[#7E57C2]" @click="handleFollow()">Seguir</Button>
+        <div v-if="editar">
+            <div class="flex mt-10">
+              <Button class="bg-[#7E57C2]" @click="goTo()">Editar</Button>
+            </div>
         </div>
-        
-        <div v-else class="flex mt-10">
-            <Button class="bg-[#5A3A93]" @click="handleFollow()">Seguindo</Button>
+        <div v-else>
+           <div v-if="seguindo" class="flex mt-10">
+              <Button class="bg-[#7E57C2]" @click="handleFollow()">Seguir</Button>
+            </div>
+            
+            <div v-else class="flex mt-10">
+                <Button class="bg-[#5A3A93]" @click="handleFollow()">Seguindo</Button>
+            </div>
         </div>
+       
 
     </div>
-  
+ 
     <div class=" mt-10 p-5">
       <Tabs default-value="videos" class="w-full mt-4">
         <TabsList class="grid w-full grid-cols-2 border-none bg-transparent w-[200px]">
@@ -262,8 +345,39 @@ interface Video {
           </div>
           
         </TabsContent>
-        <TabsContent value="playlist">
-        
+        <TabsContent value="playlist" class="w-full">
+          <div class="w-full  " >
+
+             <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
+                <div
+                  v-for="playlist in playlists"
+                  :key="playlist.playlist_id"
+                  class="bg-white" 
+                  style="cursor: pointer;"
+                  @click="goToPageVideWithId(playlist.playlist_id)"
+                >
+                <div v-if="playlist.status == 'ativo'">
+
+                  <div>
+                    <img
+                      v-if="playlist.imagem"
+                      :src="`http://localhost:8000/uploads/${playlist.imagem}`"
+                      alt="Thumbnail"
+                      class="mt-2 h-[190px] w-[443px] object-cover rounded-xl"
+                    />
+                  </div>
+                  <div class="flex mt-3 gap-4 items-center">
+                    <div>
+                      <h3 class="font-bold text-base">{{ playlist.titulo }}</h3>
+                      <!-- <p class="text-xs">{{ playlist.visualizacoes }} visualizações</p> -->
+                    </div>
+                  </div>
+                </div>
+
+                </div>
+              </div>
+            
+          </div>
         </TabsContent>
       </Tabs>
   </div>

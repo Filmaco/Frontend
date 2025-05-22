@@ -2,6 +2,7 @@
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar.vue";
 import Separator from "@/components/ui/separator/Separator.vue";
+import Switch from "@/components/ui/switch/Switch.vue";
 import { AlignJustify } from "lucide-vue-next";
 import {
   AudioWaveform,
@@ -74,7 +75,6 @@ import {
   CardTitle,
 } from '@/components/ui/card'
 import { cn } from "@/lib/utils";
-import Switch from "@/components/ui/switch/Switch.vue";
 import { RouterView } from "vue-router";
 import { UserService } from "@/services/user.service";
 import TokenService from "@/services/storage.service";
@@ -152,7 +152,7 @@ export default {
     UserService.perfil()
       .then(user => {
         this.data.user = user.usuario;
-        //console.log('user: ', this.data.user);
+        // console.log('user: ', this.data.user);
         
       })
       .catch((e) => {

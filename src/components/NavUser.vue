@@ -36,7 +36,7 @@ import router from '@/routes'
 
 const props = defineProps<{
   user: {
-    id: number
+    usuario_id: number
     nome_completo: string
     email: string
     avatar: string
@@ -52,8 +52,9 @@ async function logout() {
 }
 
  async function goToPerfil(id:number) {
-            router.push({ name: 'Usuario.Perfil', params: { id } })
-        }
+  
+    router.push({ name: 'Usuario.Perfil', params: { id } })
+}
 
 </script>
 
@@ -108,7 +109,7 @@ async function logout() {
               <BadgeCheck />
               Account
             </DropdownMenuItem>
-            <DropdownMenuItem @click="goToPerfil(user.id)">
+            <DropdownMenuItem @click="goToPerfil(user.usuario_id)">
               <User />
               Perfil
             </DropdownMenuItem>
