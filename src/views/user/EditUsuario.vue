@@ -32,6 +32,7 @@ import rio from '@/assets/imagens/rio.jpg'
 import { SquarePenIcon, Trash, Trash2, LucideEdit } from 'lucide-vue-next';
 import { UserService } from '@/services/user.service';
 import Separator from '@/components/ui/separator/Separator.vue';
+import router from '@/routes';
   
   export default defineComponent({
     components:{
@@ -74,18 +75,21 @@ import Separator from '@/components/ui/separator/Separator.vue';
           genero: '',
           biografia: '',
         },
+        usuarioOriginal: {} as any,
+        confirmarSenha: '',
         genero: {
           
         },
         rio,
         defaultImg: '/img/default-user.jpg',
-       
+        novaSenha: '',
       };
     },
     mounted() { 
     UserService.perfil()
       .then(user => {
         this.usuario = user.usuario;
+         this.usuarioOriginal = { ...user.usuario }; 
         //console.log('user: ', this.usuario);
         
       })
@@ -95,40 +99,75 @@ import Separator from '@/components/ui/separator/Separator.vue';
       });
     },
     methods: {
-      async atualizarUsuario() {
+     async atualizarUsuario() {
         try {
-
           const formData = new FormData();
-          formData.append('nome_completo', this.usuario.nome_completo);
-          formData.append('email', this.usuario.email);
-          formData.append('senha', this.usuario.senha);
-          formData.append('username', this.usuario.username);
-          formData.append('data_nascimento', this.usuario.data_nascimento);
-          formData.append('genero', this.usuario.genero);
-          formData.append('biografia', this.usuario.biografia);
-          if (this.usuario.foto_perfil) {
+
+          for (const key in this.usuario) {
+            if (key === 'foto_perfil' || key === 'senha') continue;
+            const novoValor = this.usuario[key];
+            const valorOriginal = this.usuarioOriginal[key];
+
+            if (novoValor !== valorOriginal && novoValor !== undefined) {
+              formData.append(key, novoValor);
+            }
+          }
+
+          if (this.novaSenha || this.confirmarSenha) {
+            if (this.novaSenha !== this.confirmarSenha) {
+              alert('As senhas não coincidem.');
+              return;
+            }
+            formData.append('senha', this.novaSenha);
+          }
+
+          if (this.usuario.foto_perfil && this.usuario.foto_perfil !== this.usuarioOriginal.foto_perfil) {
             formData.append('foto_perfil', this.usuario.foto_perfil as File);
           }
 
-          const response = await axios.put(`http://localhost:8000/usuarios/editar/${this.usuario.usuario_id}`, formData, {
-            headers: {
-              'Content-Type': 'multipart/form-data'
+          if ([...formData.keys()].length === 0) {
+            alert("Nenhuma alteração detectada.");
+            return;
+          }
+
+          const response = await axios.put(
+            `http://localhost:8000/usuarios/editar/${this.usuario.usuario_id}`,
+            formData,
+            {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              }
             }
-          });
+          );
+
+          alert("Usuário atualizado com sucesso!");
+          this.usuarioOriginal = { ...this.usuario };
+          this.novaSenha = '';
+          this.confirmarSenha = '';
           window.location.reload(); 
-          
           return response;
-          
+
         } catch (error) {
           alert('Erro ao atualizar usuário.');
           console.error(error);
         }
       },
+
       handleFileChange(event) {
         const file = event.target.files[0]
         if (file) {
           this.usuario.foto_perfil = file
         }
+      },
+
+      InativateUsuario() {
+        UserService.inativarUsuario(Number(this.usuario.usuario_id))
+        .then((response) => {
+          
+           window.location.href = '/';
+            return response;
+        })
+        .catch((error) => console.log())
       }
     }
   });
@@ -164,6 +203,11 @@ import Separator from '@/components/ui/separator/Separator.vue';
         </div>
 
           <p class="text-xl">{{ usuario.nome_completo }}</p>
+
+          <div class="mt-3">
+            <Button @click="InativateUsuario">Inativar Conta</Button>
+          </div>
+          
           <!--div class="p-4 flex gap-2">
               <div class="border p-1" style="border-radius: 5px; cursor: pointer;">
                 <SquarePenIcon/>
@@ -282,8 +326,30 @@ import Separator from '@/components/ui/separator/Separator.vue';
             </div>
             
           </TabsContent>
-          <TabsContent value="password">
-          
+          <TabsContent value="password" class="w-full">
+            <div class="w-[50vw]">
+                 <div class="pt-3">
+                    <Label>NOVA SENHA</Label>
+                    <Input
+                      type="password"
+                      class="mt-3"
+                      placeholder="Nova senha"
+                      v-model="novaSenha"
+                    />
+                  </div>
+
+                  <div class="pt-3 w-[90%]">
+                    <Label>CONFIRMAR SENHA</Label>
+                    <Input
+                      type="password"
+                      class="mt-3"
+                      placeholder="Confirmar senha"
+                      v-model="confirmarSenha"
+                    />
+                  </div>
+            </div>
+           
+
           </TabsContent>
         </Tabs>
       </form>

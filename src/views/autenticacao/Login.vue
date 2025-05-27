@@ -21,6 +21,7 @@ export default {
         //user padrao 
         // email: 'tilara.cloud@gmail.com',
         senha: 'Senha123@',
+        // senha: 'Senha@123'
       },
       confirmar_senha: '',
       erros: {},
@@ -70,11 +71,13 @@ export default {
        <form @submit.prevent="loginUsuario" class="w-[30vw] mb-[50px]">
        
         <div class="my-2">
-            <Input v-model="usuario.email" placeholder="Email" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
+          <Label class="pl-2">E-mail</Label>  
+          <Input v-model="usuario.email" placeholder="Email" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
             <p v-if="submit && erros.email" class="text-red-500 text-sm pl-3 pt-1">{{ erros.email }}</p>
         </div>
         <div class="my-2">
-            <Input v-model="usuario.senha" type="password" placeholder="Senha" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
+          <Label class="pl-2">Senha</Label>  
+          <Input v-model="usuario.senha" type="password" placeholder="Senha" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
             <p v-if="submit && erros.senha" class="text-red-500 text-sm pl-3 pt-1">{{ erros.senha }}</p>
         </div>
 

@@ -37,6 +37,17 @@ const columns: ColumnDef<Data>[] = [
       },
       cell: ({ row }) => h('div', { class: 'lowercase text-left' }, row.getValue('status')),
     },
+
+    {
+      accessorKey: 'tipo',
+      header: ({ column }) => {
+        return h(Button, {
+          variant: 'ghost',
+          onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
+        }, () => ['Tipo', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
+      },
+      cell: ({ row }) => h('div', { class: 'lowercase text-left' }, row.getValue('tipo')),
+    },
   ]
 
   export default columns;

@@ -23,6 +23,11 @@ import axios from 'axios';
 import { toast } from 'vue-sonner';
 import { UserService } from '@/services/user.service';
 import Label from '@/components/ui/label/Label.vue';
+import { defineEmits } from 'vue';
+
+const emit = defineEmits<{
+  (event: 'close-modal', value: boolean): void;
+}>();
 
 export default defineComponent({
   components: {
@@ -337,9 +342,12 @@ export default defineComponent({
           headers: { 'Content-Type': 'multipart/form-data' }
         });
        console.log(formData);
+      this.closeDialog()
+       return response
        
       } catch (error) {
         console.log(error, this.video);
+        this.closeDialog()
         
       } finally {
         this.enviando = false;
@@ -371,8 +379,13 @@ export default defineComponent({
       } else {
        this.video.duracao = ''
       }
+    },
+
+    closeDialog(){
+      emit('close-modal', true);
+
     }
-    
+     
   }
 })
 </script>
@@ -468,7 +481,7 @@ export default defineComponent({
       </div>
 
       <div class="w-full flex justify-between mt-16 mx-2">
-        <Button class="w-[20%]" style="border-radius: 30px;">Cancelar</Button>
+       
         <Button class="w-[20%] bg-[#7E57C2] hover:bg-[#513188]" style="border-radius: 30px;" type="submit">Adicionar</Button>
       </div>
     </form>

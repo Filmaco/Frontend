@@ -58,9 +58,7 @@ export default defineComponent({
     .then((response) => {
         console.log('perfil',response.usuario.tipo);
         this.tipo = response.usuario.tipo;
-        if(this.tipo == 'administrador') {
-          router.push({ name: 'Home.ADM' })
-        }
+        
         
     })
     .catch((error) => console.log(error)
@@ -148,89 +146,8 @@ export default defineComponent({
 
 
 <template>
-  <div>
-    <Carousel
-      class="relative w-[160vh] max-w-[160vh] ml-10"
-      :opts="{
-        align: 'start',
-      }"
-    >
-      <CarouselContent class=" gap-2">
-        <CarouselItem class="flex-none p-0 m-0 flex justify-center pl-3">
-          <div class="p-1">
-            <Card 
-              class="shadow-transparent border-0 bg-red-300"
-              style="cursor: pointer; border-radius: 30px;"
-            >
-              <CardContent
-                @click="selecionarTag('null')"
-                :class="{ 'selecionada': tagSelecionada === 'null' }"
-                class="flex items-center justify-center bg-[#D7BAFF] px-4 py-2"
-                style="border-radius: 60px;"
-              >
-                <span class="text-[15px] font-semibold">Tudo</span>
-              </CardContent>
-            </Card>
-          </div>
-        </CarouselItem>
-        <CarouselItem 
-          v-for="(tag, index) in tags" 
-          :key="tag.nome_tag" 
-          class="flex-none p-0 m-0 flex justify-center pl-3"
-        >
-          <div class="p-1 ">
-            <Card 
-             
-              class="shadow-transparent border-0 bg-red-300"
-              style="cursor: pointer; border-radius: 30px;"
-            >
-              <CardContent
-               @click="selecionarTag(tag.nome_tag)"
-              :class="{ 'selecionada': tag.nome_tag === tagSelecionada }"
-                class="flex items-center justify-center bg-[#D7BAFF] px-4 py-2"
-                style="border-radius: 60px;"
-              >
-                <span class="text-[15px] font-semibold">{{ tag.nome_tag }}</span>
-              </CardContent>
-            </Card>
-          </div>
-        </CarouselItem>
-      </CarouselContent>
-      <CarouselPrevious />
-      <CarouselNext />
-    </Carousel>
-
-    <p v-if="tagSelecionada">Tag selecionada: {{ tagSelecionada }}</p>
-
-    <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
-      <div
-        v-for="video in videosByTag"
-        :key="video.id"
-        class="bg-white" 
-        style="cursor: pointer;"
-       
-      >
-        <div  @click="goToPageVideWithId(video.id)">
-          <img
-            v-if="video.imagem"
-            :src="`http://localhost:8000/uploads/${video.imagem}`"
-            alt="Thumbnail"
-            class="mt-2 h-[190px] w-[443px] object-cover rounded-xl"
-          />
-        </div>
-        <div class="flex mt-3 gap-4">
-          <Avatar @click="goToPerfilWithId(video.nome_usuario)">
-            <AvatarImage src="https://github.com/unovue.png" alt="@unovue" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-          <div>
-            <h3  @click="goToPageVideWithId(video.id)" class="font-bold text-base">{{ video.nome }}</h3>
-            <p class="text-xs" @click="goToPerfilWithId(video.nome_usuario)">{{ video.nome_usuario }}</p>
-          </div>
-        </div>
-
-      </div>
-    </div>
+  <div class="p-10">
+    ADM
   </div>
 </template>
 

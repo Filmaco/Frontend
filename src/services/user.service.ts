@@ -33,16 +33,38 @@ const UserService = new class {
     }
   }
 
-  public cadastrar(data: any): Promise<any> {
-    return axios.post(`${API_URL}/cadastro`, data)
-      .then(response => response.data)
-      .catch((error: AxiosError) => { throw error });
+  public async cadastrar(data: any): Promise<any> {
+    try {
+      const response = await axios.post(`${API_URL}/usuarios/add`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+
+      return response;
+
+    } catch (error: any) {
+      const serverMessage = error.response?.data?.mensagem;
+      throw new Error(serverMessage || error.message || 'Erro inesperado');
+    }
   }
 
-  public delete(id: number): Promise<any> {
-    return axios.post(`${API_URL}/deletar`, { id })
-      .then(response => response.data)
-      .catch((error: AxiosError) => { throw error });
+  public async editar(data: any, id: number): Promise<any> {
+    try {
+      const response = await axios.put(`${API_URL}/usuarios/editar/${id}`, data, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      });
+
+
+      return response;
+
+    } catch (error: any) {
+      const serverMessage = error.response?.data?.mensagem;
+      throw new Error(serverMessage || error.message || 'Erro inesperado');
+    }
   }
 
   // public async logout() {
@@ -103,6 +125,74 @@ const UserService = new class {
       throw error;
     }
   }
+
+  public async inativarUsuario(id:number) : Promise<any> {
+    try {
+      const response = await axios.put(`${API_URL}/usuarios/inativar/${id}/inativo`, {})
+
+      TokenService.removeIdUser()
+      localStorage.removeItem('token');
+      localStorage.removeItem('name');
+     
+      return response;
+    }catch(error) {
+        alert('Erro ao inativar')
+        console.error(error);
+
+      }
+  }
+
+  public async ativarUsuario(id:number) : Promise<any> {
+    try {
+      const response = await axios.put(`${API_URL}/usuarios/status/${id}/ativo`, {})
+     
+      return response;
+    }catch(error) {
+        alert('Erro ao inativar')
+        console.error(error);
+
+      }
+  }
+
+  public async inativarUsuarioADM(id:number) : Promise<any> {
+    try {
+      const response = await axios.put(`${API_URL}/usuarios/status/${id}/inativo`, {})
+     
+      return response;
+    }catch(error) {
+        alert('Erro ao inativar')
+        console.error(error);
+
+      }
+  }
+
+  public async alterarTipoUsuario(adminId: number, usuarioIdPromovido: number, tipo:string): Promise<any> {
+    try {
+      const token = TokenService.getToken();
+      if (!token) {
+        throw new Error("Token não encontrado.");
+      }
+
+      const response = await axios.put(
+        `${API_URL}/usuarios/promover/${adminId}/${usuarioIdPromovido}/${tipo}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      );
+
+      return response.data;
+
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        throw error.response?.data || error;
+      }
+      throw error;
+    }
+  }
+
   
 };
 

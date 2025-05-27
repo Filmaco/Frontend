@@ -6,12 +6,15 @@ import Separator from '@/components/ui/separator/Separator.vue'
 import { toast } from 'vue-sonner'
 import { defineComponent, ref, onMounted } from 'vue';
 import router from '@/routes'
+import { UserService } from '@/services/user.service'
+import Label from '@/components/ui/label/Label.vue'
 
 export default {
   components: {
     Button,
     Input,
-    Separator
+    Separator,
+    Label,
   },
   data() {
     return {
@@ -19,14 +22,14 @@ export default {
         nome_completo: 'Felix',
         username: 'felix',
         email: 'felix@gmail.com',
-        senha: '',
+        senha: '123@Senha',
         data_nascimento: '2005-08-18',
         foto_perfil: null as File | null,
         genero: 'masculino',
         biografia: 'Gato',
         tipo: 'comum'
       },
-      confirmar_senha: '',
+      confirmar_senha: '123@Senha',
       erros: {
         nome_completo: '',
         username: '',
@@ -36,6 +39,8 @@ export default {
         data_nascimento: '',
       },
       submit: false,
+      error: '',
+      statusError: false
     }
   },
   methods: {
@@ -47,11 +52,21 @@ export default {
         email: '',
         senha: '',
         confirmar_senha: '',
-        data_nascimento: ''
+        data_nascimento: '',
       }
 
       if (!this.usuario.nome_completo) this.erros.nome_completo = 'Nome completo é obrigatório'
-      if (!this.usuario.username) this.erros.username = 'Username é obrigatório'
+      if (!this.usuario.username) {
+        this.erros.username = 'Username é obrigatório'
+      } else {
+        const usernameRegex = /^[a-zA-Z0-9._]{3,20}$/;
+        console.log('caiu aqui no else');
+        if (!usernameRegex.test(this.usuario.username)) {
+          this.erros.username = 'Username inválido. Use de 3 a 20 letras, números, ponto ou underline, sem espaços.'
+          console.log('caiu aqui no if');
+          
+        }
+      }
       if (!this.usuario.email) {
         this.erros.email = 'Email é obrigatório'
       } else {
@@ -65,7 +80,20 @@ export default {
       if (this.usuario.senha && this.confirmar_senha && this.usuario.senha !== this.confirmar_senha) {
         this.erros.confirmar_senha = 'As senhas não coincidem'
       }
-      if (!this.usuario.data_nascimento) this.erros.data_nascimento = 'Data de nascimento é obrigatória'
+      if (!this.usuario.data_nascimento) {
+        this.erros.data_nascimento = 'Data de nascimento é obrigatória'
+      } else {
+        const hoje = new Date();
+        const nascimento = new Date(this.usuario.data_nascimento);
+        const idade = hoje.getFullYear() - nascimento.getFullYear();
+        const mes = hoje.getMonth() - nascimento.getMonth();
+        const dia = hoje.getDate() - nascimento.getDate();
+
+        const idadeValida = idade > 13 || (idade === 13 && (mes > 0 || (mes === 0 && dia >= 0)));
+        if (!idadeValida) {
+          this.erros.data_nascimento = 'Você deve ter pelo menos 13 anos para se cadastrar.';
+        }
+      }
 
       const senhaRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/
       if (this.usuario.senha && !senhaRegex.test(this.usuario.senha)) {
@@ -108,21 +136,24 @@ export default {
         formData.append('foto', this.usuario.foto_perfil as File);
       }
 
-      console.log('click 3');
       try {
-        const response = await axios.post('http://localhost:8000/usuarios/add', formData, {
-          headers: {
-            'Content-Type': 'multipart/form-data'
-          }
-        });
-
+        const response =  UserService.cadastrar(formData)
         router.push({ name: 'Auth.Login' });
-        return response
-      } catch (error) {
-        toast.error('Erro ao criar usuário', {
-          description: error || 'Tente novamente mais tarde.'
-        });
+        return response;
       }
+      catch(error:any) {
+         this.error = error.response?.data?.mensagem;
+            console.log(error.response);
+
+            this.statusError = true
+      }
+     
+        
+
+        
+
+      
+
     },
     handleFileChange(event: Event) {
       const target = event.target as HTMLInputElement
@@ -145,41 +176,60 @@ export default {
 
        <form @submit.prevent="criarUsuario" class="w-[30vw] mb-[50px]">
        <div class="my-2">
+         <Label class="pl-2">Nome Completo</Label>
          <Input v-model="usuario.nome_completo" placeholder="Nome completo" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
          <p v-if="submit && erros.nome_completo" class="text-red-500 text-sm pl-3 pt-1">{{ erros.nome_completo }}</p>
        </div>
        <div class="my-2">
+         <Label class="pl-2">Username</Label>
          <Input v-model="usuario.username" placeholder="Username" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
          <p v-if="submit && erros.username" class="text-red-500 text-sm pl-3 pt-1">{{ erros.username }}</p>
        </div>
        <div class="my-2">
+         <Label class="pl-2">E-mail</Label>
          <Input v-model="usuario.email" placeholder="Email" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
          <p v-if="submit && erros.email" class="text-red-500 text-sm pl-3 pt-1">{{ erros.email }}</p>
        </div>
-       <div class="my-2">
-         <Input v-model="usuario.senha" type="password" placeholder="Senha" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
-         <p v-if="submit && erros.senha" class="text-red-500 text-sm pl-3 pt-1">{{ erros.senha }}</p>
+
+       <div class="flex">
+           <div class="my-2 pr-1">
+            <Label class="pl-2">Senha</Label>
+            <Input v-model="usuario.senha" type="password" placeholder="Senha" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
+            <p v-if="submit && erros.senha" class="text-red-500 text-sm pl-3 pt-1">{{ erros.senha }}</p>
+          </div>
+          <div class="my-2 pl-1">
+            <Label class="pl-2">Confirme a Senha</Label>
+            <Input v-model="confirmar_senha" type="password" placeholder="Confirmar senha" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
+            <p v-if="submit && erros.confirmar_senha" class="text-red-500 text-sm pl-3 pt-1">{{ erros.confirmar_senha }}</p>
+          </div>
        </div>
-       <div class="my-2">
-         <Input v-model="confirmar_senha" type="password" placeholder="Confirmar senha" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
-         <p v-if="submit && erros.confirmar_senha" class="text-red-500 text-sm pl-3 pt-1">{{ erros.confirmar_senha }}</p>
+      
+
+       <div class="flex">
+          <div class="my-2 w-full pr-1">
+          <Label class="pl-2">Data de Naciemente</Label>
+          <Input v-model="usuario.data_nascimento" type="date" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
+          <p v-if="submit && erros.data_nascimento" class="text-red-500 text-sm pl-3 pt-1">{{ erros.data_nascimento }}</p>
+        </div>
+        <div class="my-2 w-full pl-1">
+          <Label class="pl-2">Genero</Label>
+          <Input v-model="usuario.genero" placeholder="Gênero" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
+        </div>
        </div>
+       
        <div class="my-2">
-         <Input v-model="usuario.data_nascimento" type="date" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
-         <p v-if="submit && erros.data_nascimento" class="text-red-500 text-sm pl-3 pt-1">{{ erros.data_nascimento }}</p>
-       </div>
-       <div class="my-2">
-         <Input v-model="usuario.genero" placeholder="Gênero" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
-       </div>
-       <div class="my-2">
+         <Label class="pl-2">Biografia</Label>
          <Input v-model="usuario.biografia" placeholder="Biografia" class="radius pl-5" style="border-radius: 60px; height: 40px;"/>
        </div>
 
        <div>
+         <Label class="pl-2">Imagem de Perfil</Label>
         <Input type="file" @change="handleFileChange" />
        </div>
 
        <Button class="w-full mt-[20px] radius text-lg bg-purple-800" style="border-radius: 60px; height: 40px;"  >Cadastrar</Button>
+
+       <p v-if="statusError" class="text-red-500 text-sm pl-3">Username ou email ja cadastrado, teste novamente</p>
      </form>
 
        <!--Separator class="mb-[40px] text-base w-[50%]" label="Ou continue com" />

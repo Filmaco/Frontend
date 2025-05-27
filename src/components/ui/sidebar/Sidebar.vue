@@ -33,7 +33,7 @@ const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
       :side="side"
       class="w-[--sidebar-width] bg-[#D7BAFF] p-0 text-white [&>button]:hidden"
       :style="{
-        '--sidebar-width': SIDEBAR_WIDTH_MOBILE,
+        '--sidebar-width': '100px',
       }"
     >
       <div class="flex h-full w-full flex-col">

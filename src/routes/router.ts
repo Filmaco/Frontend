@@ -14,12 +14,25 @@ import MeusVideos from '@/views/user/MeusVideos.vue'
 import ListaPlaylists from "@/views/playlist/ListaPlaylists.vue";
 import Playlist from '@/views/playlist/Playlist.vue'
 import EditarPlaylist from '@/views/playlist/EditarPlaylist.vue'
+import HomeADM from '@/views/HomeADM.vue'
+import { UserService } from '@/services/user.service'
+
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: DefaultLayout,
     children: [
+       {
+        path: '',
+        name: 'Home.ADM',
+        component: HomeADM,
+        meta: {
+          requiresAdmin: true,
+          
+          requiresAuth: true
+        }
+      },
       {
         path: '',
         name: 'Home',
@@ -33,6 +46,7 @@ const routes: Array<RouteRecordRaw> = [
         component: ListaUsuario,
         meta: {
           requiresAdmin: true,
+          
         }
       },
       {
@@ -62,6 +76,7 @@ const routes: Array<RouteRecordRaw> = [
         name: 'Usuario.Editar',
         component: EditUsuario,
         meta: {
+           requiresAuth: true
         }
       },
       {
@@ -92,6 +107,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
         }
       },
+      
     ]
   },
   {

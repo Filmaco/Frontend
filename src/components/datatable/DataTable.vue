@@ -24,6 +24,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
 import {
   FlexRender,
@@ -60,16 +61,38 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { inject, onMounted, provide, ref, watch, h } from 'vue'
 import { cn, valueUpdater } from '@/lib/utils'
-import { EllipsisVertical } from 'lucide-vue-next'
+import { EllipsisVertical, Pencil } from 'lucide-vue-next'
 import { ArrowUpDown, ChevronDown, Trash2 } from 'lucide-vue-next'
 import { defineEmits } from 'vue'
+import ModalUser from '@/components/ModalUser.vue'
+
+const selectedUser = ref<any>(null)
+const isDialogOpen = ref(false)
+
+  console.log(`antes dialog ${isDialogOpen.value} e user ${selectedUser.value}`);
+
+function openUserDialog(user: any) {
+  selectedUser.value = user
+  isDialogOpen.value = true
+  console.log(`depois dialog ${isDialogOpen.value} e user ${selectedUser.value}`);
+  
+}
 
 const props = defineProps<{
   columns: ColumnDef<TData>[]
   data: TData[]
+  userId: Number
 }>()
 
 const sorting = ref<SortingState>([])
@@ -102,6 +125,11 @@ const table = useVueTable({
 
 const emit = defineEmits<{
   (event: 'handle-click-get-id', id: number): void;
+  (event: 'inativar-por-id', id: number): void;
+  (event: 'tornar-adm', id: number): void;
+   (event: 'tornar-comum', id: number): void;
+  (event: 'ativar-por-id', id: number): void;
+   
 }>();['handle-click-get-id'];
 
 const handleClickId = (data: TData) => {
@@ -109,6 +137,25 @@ const handleClickId = (data: TData) => {
     emit('handle-click-get-id', id)
 }
 
+const inativar = (data: TData) => {
+    const {id} = data as unknown as {id: number}
+    emit('inativar-por-id', id)
+}
+
+const ativar = (data: TData) => {
+    const {id} = data as unknown as {id: number}
+    emit('ativar-por-id', id)
+}
+
+const tornarADM = (data: TData) => {
+    const {id} = data as unknown as {id: number}
+    emit('tornar-adm', id)
+}
+
+const tornarComum = (data: TData) => {
+    const {id} = data as unknown as {id: number}
+    emit('tornar-comum', id)
+}
 </script>
 
 <template>
@@ -134,14 +181,42 @@ const handleClickId = (data: TData) => {
           <TableBody>
             <template v-if="table.getRowModel().rows?.length">
               <template v-for="row in table.getRowModel().rows" :key="row.id">
-                  <TableRow :data-state="row.getIsSelected() && 'selected'" @click="handleClickId(row.original)">
+                  <TableRow
+                      :data-state="row.getIsSelected() && 'selected'"
+                      @click="openUserDialog(row.original)"
+                      class="cursor-pointer hover:bg-muted transition"
+                    >
+
                     <TableCell v-for="cell in row.getVisibleCells()" :key="cell.id">
                       <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                     </TableCell>
                     <TableCell>
-                        <Button>
-                          <Trash2/>
-                        </Button>
+                       <DropdownMenu>
+                        
+                          <DropdownMenuTrigger  @click.stop>
+                            <Pencil/>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent >
+                             <DropdownMenuItem 
+                                v-if="(row.original as any).tipo === 'comum'" 
+                                @click="tornarADM(row.original)"
+                              >
+                                <span>Tornar Administrador</span>
+                              </DropdownMenuItem>
+                              <DropdownMenuItem 
+                                v-else-if="(row.original as any).tipo === 'administrador' && (row.original as any).id !== userId" 
+                                @click="tornarComum(row.original)"
+                              >
+                                <span>Tornar Comum</span>
+                              </DropdownMenuItem>
+                             <DropdownMenuItem @click="inativar(row.original)">
+                              <span>Inativar</span>
+                            </DropdownMenuItem>
+                             <DropdownMenuItem @click="ativar(row.original)">
+                              <span>Ativar</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 <TableRow v-if="row.getIsExpanded()">
@@ -188,4 +263,22 @@ const handleClickId = (data: TData) => {
       </div>
     </div>
   </div>
+  <Dialog v-model:open="isDialogOpen">
+    <DialogContent class="sm:max-w-[625px]">
+      <DialogHeader>
+        <DialogTitle>Informações do Usuário</DialogTitle>
+        <DialogDescription>
+          Detalhes do usuário selecionado.
+        </DialogDescription>
+      </DialogHeader>
+
+      <ModalUser :user="selectedUser" />
+
+      <DialogFooter>
+        <Button @click="isDialogOpen = false">Fechar</Button>
+      </DialogFooter>
+    </DialogContent>
+  </Dialog>
+
+
 </template>

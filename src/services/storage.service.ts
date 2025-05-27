@@ -38,6 +38,11 @@ const TokenService = {
         localStorage.removeItem(TOKEN_KEY);
     },
 
+    removeIdUser() {
+        localStorage.removeItem('usuario_id')
+    },
+
+
     // getRefreshToken() {
     //     return localStorage.getItem(REFRESH_TOKEN_KEY);
     // },
