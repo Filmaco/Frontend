@@ -68,11 +68,11 @@ import {
 interface Video {
   id: number;
   usuario_id: number;
-  nome: string;
+  titulo: string;
   visualizacoes: number;
   imagem: string | null;
   tags: []
-  nome_usuario: string,
+  titulo_usuario: string,
   duracao: string,
 }
 
@@ -145,6 +145,7 @@ interface Video {
         id: 0,
         playlist: {
           usuario_id: '',
+          id: 0,
           titulo: '',
           imagem: null as File | null,
         },
@@ -164,7 +165,8 @@ interface Video {
              this.playlist = {
               usuario_id: response.playlist.playlist.usuario_id,
               titulo: response.playlist.playlist.titulo,
-              imagem: response.playlist.playlist.imagem, 
+              imagem: response.playlist.playlist.imagem,
+              id: response.playlist.playlist.playlist_id
              }
           console.log(response);
           
@@ -181,7 +183,7 @@ interface Video {
             
             items = await response.data.map((item:any) => ({
                     video_id: item.id,
-                    nome: item.nome,
+                    titulo: item.titulo,
                     visualizacoes: item.visualizacoes,
                     imagem: item.imagem,
                     status: item.status,
@@ -214,6 +216,44 @@ interface Video {
       async goToEditarPlaylist() {
         const id = this.id
         router.push({ name: 'Playlist.Editar', params: {id} })
+      },
+
+      async atualizarPlaylist() {
+      try {
+        const formData = new FormData();
+        formData.append('titulo', this.playlist.titulo);
+        if (this.playlist.imagem instanceof File) {
+          formData.append('imagem', this.playlist.imagem);
+        }
+
+      
+        const response = await PlaylistService.editarPlaylist(this.playlist.id, formData);
+
+        //window.location.reload();
+        return response;
+
+      } catch (error) {
+        alert('Erro ao atualizar vídeo.');
+        console.error(error);
+      }
+    },
+
+     handleFileChange(event) {
+        const file = event.target.files[0]
+        if (file) {
+          this.playlist.imagem = file
+        }
+      },
+
+      async inativarVideo(id: number) {
+        try {
+          const response = await VideoService.inativarVideo(id)
+          return response;
+        }
+        catch(error) { console.log(error);
+         }
+
+        //  window.location.reload()
       }
     
     }
@@ -237,79 +277,77 @@ interface Video {
                       <p class="py-3 text-xl">{{ playlist.titulo }}</p>
                       <p class="text-[10px]"> 0 Videos</p>
                     </div>
-                    <div class="py-2 flex">
-                      <div @click="inativarPlaylist" class="border rounded-full p-2 mx-1" style="cursor: pointer;">
-                         <CircleX/>
-                      </div>
-                      <div class="border rounded-full p-2 mx-1" style="cursor: pointer;">
-                        <Pen/>
-                          <AlertDialog >
-                              <AlertDialogTrigger as-child>
-                              
-                                  <div class="flex flex-col items-center"  style="cursor: pointer;">
-                                    <CirclePlus/>
-                                    <p> Adicionar à Playlist</p>
-
+                     <DropdownMenu>
+                       <DropdownMenuTrigger as-child class="flex items-center justify-center ">
+                        <div class="rounded-full border flex items-center inline h-[30px] w-[30px] justify-center" style="cursor: pointer;">
+                           <EllipsisVertical class=""/>
+                         </div>
+                       </DropdownMenuTrigger>
+                       <DropdownMenuContent class="w-56">   
+                         <DropdownMenuGroup style="cursor: pointer;">
+                           <!-- <DropdownMenuItem>
+                             <Eye/>
+                             <span>Exibir videos indisponiveis</span>
+                           </DropdownMenuItem> -->
+                           <DropdownMenuItem>
+                             <div @click="inativarPlaylist" class="p-2 mx-1 flex" style="cursor: pointer;">
+                                <CircleX/>
+                                <p>Inativar PLaylist</p>
+                              </div>
+                           </DropdownMenuItem>
+                            <DropdownMenuItem as-child>
+                              <AlertDialog>
+                                <AlertDialogTrigger as-child>
+                                  <div class="p-2 mx-1 flex items-center gap-2 cursor-pointer">
+                                    <Pen />
+                                    <span>Editar Playlist</span>
                                   </div>
-                                
-                          
-                              </AlertDialogTrigger>
-
-                              <AlertDialogContent class="w-[430px]"  >
-                                <div >
-
-                                  <AlertDialogHeader class="pb-2">
-                                    <AlertDialogTitle>Salvar em</AlertDialogTitle>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent class="w-[430px]">
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Editar Playlist</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Deseja realmente editar esta playlist?
+                                    </AlertDialogDescription>
                                   </AlertDialogHeader>
+                                  <div>
+                                     <div class="flex flex-col items-center relative w-[175px] h-[180px]">
+                                        <label class="relative cursor-pointer">
+                                          <img
+                                            v-if="playlist.imagem"
+                                            :src="`http://localhost:8000/uploads/${playlist.imagem}`"
+                                            alt="Foto de perfil"
+                                            class="w-[175px] h-[180px] object-cover rounded-[30px] bg-gray-300"
+                                          />
+                                          <div v-else class="w-[175px] h-[180px] object-cover rounded-[30px] bg-gray-300"></div>
+                                          <div
+                                            class="absolute bottom-2 right-2 bg-white p-1 rounded-full shadow-md"
+                                          >
+                                            <LucideEdit class="w-5 h-5 text-gray-600" />
+                                          </div>
 
-                                  <Separator orientation="horizontal"/>
-
-                                <div class="space-y-2 my-5">
-                                    <div
-                                      v-for="(playlist, index) in playlistList"
-                                      :key="index"
-                                      class="flex items-center space-x-2"
-                                    >
-                                    <Checkbox
-                                      :id="`playlist-${index}`"
-                                      :modelValue="selectedPlaylistId === playlist.id"
-                                      @update:modelValue="(val) => selectedPlaylistId = val ? playlist.id : null"
-                                    />
-
-                                      <label
-                                        :for="`playlist-${index}`"
-                                        class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                      >
-                                        {{ playlist.titulo }}
-                                      </label>
-                                    </div>
+                                          <Input
+                                            type="file"
+                                            accept="image/*"
+                                            class="hidden mt-3"
+                                            @change="handleFileChange"
+                                          />
+                                        </label>
+                                      </div>
+                                    <Input v-model:model-value="playlist.titulo"/>
                                   </div>
-
-                                  <div class="flex mt-3">
-                                        <Button class="mr-2" @click="closeDialog">Cancelar</Button>
-                                        <Button  @click="addVideoNaPlaylist">Adicionar a playlist</Button>
-                                    </div>
-
-                                  <Separator orientation="horizontal"/>
-                                  
                                   <AlertDialogFooter>
-                                  
-                                    <div>
-                                          <Button variant="ghost" @click="openCriar">Criar nova playlist</Button>
-
-                                    </div>
-                                      
+                                    <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                    <AlertDialogAction @click="atualizarPlaylist">Confirmar</AlertDialogAction>
                                   </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            </DropdownMenuItem>
 
-                                </div>
-                              </AlertDialogContent>
-
-                              
-
-                            </AlertDialog>
-                      </div>
-                      
-                    </div>
+                         </DropdownMenuGroup>
+                       </DropdownMenuContent>
+                     </DropdownMenu>
+                   
                 </div>
             </div>
         </div>
@@ -326,9 +364,9 @@ interface Video {
              
             >
             <div class="grid grid-cols-4 h-full">
-              <div class="col-span-3 flex bg-red-300 grid grid-cols-6 gap-2"  @click="goToPageVideWithId(video.id)">
+              <div class="col-span-3 flex  grid grid-cols-6 gap-2"  @click="goToPageVideWithId(video.id)">
 
-                <div class=" flex bg-blue-300">
+                <div class=" flex ">
                   <img
                     v-if="video.imagem"
                     :src="`http://localhost:8000/uploads/${video.imagem}`"
@@ -341,10 +379,10 @@ interface Video {
                   </div>
                  
                 </div>
-                <div class="flex w-full mt-3 mx-3 flex-col col-span-5 bg-red-300">
+                <div class="flex w-full mt-3 mx-3 flex-col col-span-5 ">
                   
                   <div class="w-full ">
-                    <h3 class="font-bold text-base">{{ video.nome }}</h3>
+                    <h3 class="font-bold text-base">{{ video.titulo }}</h3>
                   </div>
                   <div class="">
                     <p class="text-gray-500 text-[15px]">{{ video.visualizacoes }} vizualizacoes</p>
@@ -356,8 +394,8 @@ interface Video {
               </div>
               <div class="py-2 flex">
                     <DropdownMenu>
-                       <DropdownMenuTrigger as-child class="flex items-center justify-center bg-green-300">
-                        <div class="rounded-full border bg-gray-200 flex items-center inline h-[30px] w-[30px] justify-center" style="cursor: pointer;">
+                       <DropdownMenuTrigger as-child class="flex items-center justify-center ">
+                        <div class="rounded-full border flex items-center inline h-[30px] w-[30px] justify-center" style="cursor: pointer;">
                            <EllipsisVertical class=""/>
                          </div>
                        </DropdownMenuTrigger>
@@ -367,7 +405,7 @@ interface Video {
                              <Eye/>
                              <span>Exibir videos indisponiveis</span>
                            </DropdownMenuItem> -->
-                           <DropdownMenuItem>
+                           <DropdownMenuItem @click="inativarVideo(video.id)">
                              <CircleX/>
                              <span>Inativar Video</span>
                            </DropdownMenuItem>

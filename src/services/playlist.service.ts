@@ -65,7 +65,7 @@ const PlaylistService = new class {
 
     public editarPlaylist(playlistId: number, dados: FormData): Promise<any> {
         return new Promise<any>((resolve, reject) => {
-            axios.put(`${API_URL}/${playlistId}`, dados, {
+            axios.put(`${API_URL}/editar/${playlistId}`, dados, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },

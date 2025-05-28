@@ -45,6 +45,7 @@ import {
   Trophy,
   GraduationCap,
   Podcast,
+  Play
   
 } from 'lucide-vue-next'
 import RioImage from '@/assets/imagens/rio.jpg'
@@ -118,9 +119,9 @@ const data = {
       icon: Users,
     },
     {
-      name: 'Videos',
-      url: '#',
-      icon: Users,
+      name: 'Meus Videos',
+      url: '/meus/videos',
+      icon: Play,
     },
     {
       name: 'Playlists',

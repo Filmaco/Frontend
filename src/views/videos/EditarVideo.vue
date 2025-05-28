@@ -292,6 +292,8 @@ export default defineComponent({
               tags: data.tags?.split(',') || []
             };
             console.log('DATA', this.video);
+
+
             
           })
           .catch(error => {
@@ -326,38 +328,12 @@ export default defineComponent({
       return true;
     },
 
-    async criarVideo() {
-      this.enviando = true;
-      if (!this.validarCampos()) {
-        this.enviando = false;
-        return;
-      }
-
-      const formData = new FormData();
-      formData.append('usuario_id', this.user.usuario_id);
-      formData.append('nome', this.video.nome);
-      formData.append('descricao', this.video.descricao);
-      formData.append('tipo', this.video.tipo);
-      formData.append('genero', this.video.genero);
-      formData.append('duracao', this.video.duracao);
-      formData.append('link', this.video.link);
-      formData.append('imagem', this.video.imagem as File);
-      formData.append('tags', this.video.tags.join(','));
-
-      try {
-        const response = await axios.post('http://localhost:8000/videos/add', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-       console.log(formData);
-       
-      } catch (error) {
-        console.log(error, this.video);
-        
-      } finally {
-        this.enviando = false;
-      }
+    async pegarTagPorId(id: number) {
+      const response = await VideoService.buscarNomeTagPorId(id)
+      console.log(response);
+      
     },
-    
+
     async atualizarVideo() {
       try {
         const formData = new FormData();
@@ -372,14 +348,11 @@ export default defineComponent({
           formData.append('imagem', this.video.imagem);
         }
 
-       
-        
-
         formData.append('tags', this.video.tags.join(','));
 
         const response = await VideoService.editarVideo(this.videoId, formData);
 
-        //window.location.reload();
+        window.location.reload();
         return response;
 
       } catch (error) {
@@ -393,6 +366,13 @@ export default defineComponent({
         if (file) {
           this.video.imagem = file
         }
+    },
+
+     onTagsUpdate(novasTags: string[]) {
+        // if (novasTags.length < this.video.tags.length) {
+          console.log('oi'); // A tag foi removida
+        // }
+        // this.video.tags = novasTags; // Atualiza o estado
       }
 
   }
@@ -460,7 +440,10 @@ export default defineComponent({
 
           </div>
           <Label class="ml-2 ">Tags do Video</Label>
-          <TagsInput v-model="video.tags" class="mb-4 ml-2">
+          <TagsInput 
+            v-model="video.tags"
+            @click="onTagsUpdate"
+            class="mb-4 ml-2">
             <TagsInputItem v-for="item in video.tags" :key="item" :value="item">
               <TagsInputItemText />
               <TagsInputItemDelete />

@@ -383,7 +383,6 @@ export default defineComponent({
 
 <template>
   <div class="p-10">
-    {{ idPlaylist }}
     <div v-if="data.video.link" class="aspect-w-16 aspect-h-9">
       <div>
         <iframe

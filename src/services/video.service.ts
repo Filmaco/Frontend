@@ -63,6 +63,15 @@ const VideoService = new class{
         });
     }
 
+    public buscarNomeTagPorId(idTag: number) {
+    return new Promise<any>((resolve, reject) => {
+        axios.get(`${API_URL}/tag/id/${idTag}`)
+            .then((response: AxiosResponse) => resolve(response.data))
+            .catch((error: AxiosError) => reject(error));
+    });
+}
+
+
 }
 
 
