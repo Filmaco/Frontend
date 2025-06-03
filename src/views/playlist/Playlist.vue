@@ -66,7 +66,7 @@ import {
 } from '@/components/ui/alert-dialog'
   
 interface Video {
-  id: number;
+  video_id: number;
   usuario_id: number;
   titulo: string;
   visualizacoes: number;
@@ -74,6 +74,7 @@ interface Video {
   tags: []
   titulo_usuario: string,
   duracao: string,
+  status: string
 }
 
   export default defineComponent({
@@ -149,8 +150,20 @@ interface Video {
           titulo: '',
           imagem: null as File | null,
         },
+         searchTerm: '',
       };
     },
+    computed: {
+      filteredVideos(): Video[] {
+        if (!this.searchTerm.trim()) {
+          return this.videos;
+        }
+        return this.videos.filter((video) =>
+          video.titulo.toLowerCase().includes(this.searchTerm.toLowerCase())
+        );
+      }
+    },
+
     async mounted() { 
        this.id = Number(this.$route.params.id);
         this.loadPlaylist(this.id);
@@ -182,8 +195,8 @@ interface Video {
             console.log(response);
             
             items = await response.data.map((item:any) => ({
-                    video_id: item.id,
-                    titulo: item.titulo,
+                    video_id: item.video_id,
+                    titulo: item.nome,
                     visualizacoes: item.visualizacoes,
                     imagem: item.imagem,
                     status: item.status,
@@ -191,6 +204,7 @@ interface Video {
                     criado_em: item.criado_em,
                     atualizado_em: item.atualizado_em
             }))
+            console.log(items);
             
             return items;
         
@@ -229,7 +243,7 @@ interface Video {
       
         const response = await PlaylistService.editarPlaylist(this.playlist.id, formData);
 
-        //window.location.reload();
+        // window.location.reload();
         return response;
 
       } catch (error) {
@@ -253,7 +267,7 @@ interface Video {
         catch(error) { console.log(error);
          }
 
-        //  window.location.reload()
+       
       }
     
     }
@@ -354,17 +368,22 @@ interface Video {
         <div class=" col-span-3 px-2 pt-4">
           <div class="">
             <div>
-              ordenar
+              <Input
+                  v-model="searchTerm"
+                  placeholder="Pesquisar vídeos..."
+                  class="mb-4 w-full"
+                />
             </div>
             <div
-              v-for="video in videos"
-              :key="video.id"
+              v-for="video in filteredVideos"
+
+              :key="video.video_id"
               class="flex" 
               style="cursor: pointer;"
              
             >
-            <div class="grid grid-cols-4 h-full">
-              <div class="col-span-3 flex  grid grid-cols-6 gap-2"  @click="goToPageVideWithId(video.id)">
+            <div v-if="video.status = 'ativo'" class="grid grid-cols-4 h-full">
+              <div class="col-span-3 flex  grid grid-cols-6 gap-2"  @click="goToPageVideWithId(video.video_id)">
 
                 <div class=" flex ">
                   <img
@@ -405,7 +424,7 @@ interface Video {
                              <Eye/>
                              <span>Exibir videos indisponiveis</span>
                            </DropdownMenuItem> -->
-                           <DropdownMenuItem @click="inativarVideo(video.id)">
+                           <DropdownMenuItem @click="inativarVideo(video.video_id)">
                              <CircleX/>
                              <span>Inativar Video</span>
                            </DropdownMenuItem>

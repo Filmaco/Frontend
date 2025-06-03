@@ -191,7 +191,7 @@ const tornarComum = (data: TData) => {
                       <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                     </TableCell>
                     <TableCell>
-                       <DropdownMenu>
+                       <DropdownMenu  v-if="(row.original as any).id !== userId">
                         
                           <DropdownMenuTrigger  @click.stop>
                             <Pencil/>
@@ -204,7 +204,7 @@ const tornarComum = (data: TData) => {
                                 <span>Tornar Administrador</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem 
-                                v-else-if="(row.original as any).tipo === 'administrador' && (row.original as any).id !== userId" 
+                                v-else-if="(row.original as any).tipo === 'administrador'" 
                                 @click="tornarComum(row.original)"
                               >
                                 <span>Tornar Comum</span>

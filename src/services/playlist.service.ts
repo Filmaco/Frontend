@@ -82,6 +82,20 @@ const PlaylistService = new class {
                 .catch((error: AxiosError) => reject(error));
             });
         }
+
+    public removerVideoDaPlaylist(playlistId: number, videoId: number) {
+        return new Promise<any>((resolve, reject) => {
+            axios.delete(`${API_URL}/video/remover`, {
+                params: {
+                    playlist_id: playlistId,
+                    video_id: videoId
+                }
+            })
+            .then(response => resolve(response.data))
+            .catch((error: AxiosError) => reject(error));
+        });
+    }
+
   
 }
 

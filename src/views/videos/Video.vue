@@ -3,13 +3,14 @@ import { defineComponent } from 'vue';
 import axios from 'axios';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import Button from '@/components/ui/button/Button.vue';
-import { CirclePlus, Share2, CircleEllipsis, Frown, Smile, Laugh, ThumbsDown, ThumbsUp, Heart  } from 'lucide-vue-next';
+import { CirclePlus, Share2, CircleEllipsis, Frown, Smile, Laugh, ThumbsDown, ThumbsUp, Heart, Trash  } from 'lucide-vue-next';
 import router from '@/routes';
 import CriarPlaylist from '@/views/playlist/CriarPlaylist.vue'
 import { SidebarProvider, SidebarTrigger, SidebarInset } from "@/components/ui/sidebar";
 import AppSidebar from "@/components/AppSidebar.vue";
 import Separator from "@/components/ui/separator/Separator.vue";
 import Switch from "@/components/ui/switch/Switch.vue";
+import { ComentarioService } from '@/services/comentario.service';
 import { AlignJustify } from "lucide-vue-next";
 import {
   AudioWaveform,
@@ -96,6 +97,15 @@ interface Playlist {
   titulo: string,
 }
 
+interface Comentarios {
+  comentario_id: number,
+  conteudo: string,
+  video_id: string,
+  nome_completo: string,
+  foto_perfil: string,
+  usuario_id: number
+}
+
 export default defineComponent({
   name: 'VideoPlayer',
   components: {
@@ -147,15 +157,16 @@ export default defineComponent({
     Switch,
     CriarPlaylist,
     Checkbox,
+    Trash
   },
   data() {
     return {
-      isDialogOpen: false,
+      is_dialog_open: false,
       teste: true,
       step: 'selecionar',
-      playlistList: [] as Playlist[],
+      playlist_list: [] as Playlist[],
       id: 0,
-      idPlaylist: 0,
+      id_playlist: 0,
       data: {
         video: {
           video_id: 0,
@@ -169,21 +180,26 @@ export default defineComponent({
           imagem: '',
           nome_usuario: ''
         },
-        usuarioId: '',
+        usuario_id: 0,
         playlist: {
           usuario_id: '',
           titulo: '',
           imagem: null as File | null,
         },
-        playlistVideo: {
+        playlist_video: {
            playlist_id: '',
            video_id: ''
         }
       },
       criar: true,
-      relatedVideos: [] as any[],
+      related_videos: [] as any[],
       activeIcon: null as null | 'like' | 'dislike' | 'love',
-      selectedPlaylistId:  null as (number | null),
+      selected_playlist_id:  null as (number | null),
+      video_in_playlists: [] as number[],
+      comentarios: [] as Comentarios[],
+      novo_comentario: '',
+      usuario_atual: null as any,
+
     };
   },
 
@@ -197,17 +213,22 @@ export default defineComponent({
      
       
       this.data.playlist.usuario_id = user.usuario.usuario_id;
-      //console.log('user: ',  this.data.playlist.usuario_id);
+      this.data.usuario_id = user.usuario.usuario_id;
+      console.log('user: ',  this.data.usuario_id);
       
-      this.playlistList = await this.listarPlaylist(this.playlistList )
-
+      this.playlist_list = await this.listarPlaylist(this.playlist_list )
+      this.usuario_atual = user.usuario;
     })
     .catch((e) => {
         console.log(e);
         
     });
-
-    console.log();
+    
+    this.comentarios = await this.carregarComentarios(this.comentarios);
+    console.log(this.comentarios);
+    
+    console.log( this.is_dialog_open);
+    
     
   },
 
@@ -223,6 +244,7 @@ export default defineComponent({
           maxFiles: 1,
         });
       }
+      
     });
 
     return {
@@ -259,7 +281,7 @@ export default defineComponent({
     async fetchRelatedVideos(genero: string) {
       try {
         const response = await axios.get(`http://localhost:8000/videos/genero/${genero}`);
-        this.relatedVideos = response.data.data.filter((v: any) => v.video_id !== this.data.video.video_id);
+        this.related_videos = response.data.data.filter((v: any) => v.video_id !== this.data.video.video_id);
       } catch (error) {
         console.error('Erro ao buscar vídeos relacionados:', error);
       }
@@ -274,7 +296,7 @@ export default defineComponent({
     },
 
     closeDialog() {
-      this.isDialogOpen = false;
+      this.is_dialog_open = false;
     },
 
    async addPlaylist() {
@@ -296,17 +318,17 @@ export default defineComponent({
       }
 
 
-      this.data.playlistVideo.playlist_id = String(novaPlaylistId);
-      this.data.playlistVideo.video_id = String(this.data.video.video_id);
+      this.data.playlist_video.playlist_id = String(novaPlaylistId);
+      this.data.playlist_video.video_id = String(this.data.video.video_id);
 
       const form = new FormData();
-      form.append("playlist_id", this.data.playlistVideo.playlist_id);
-      form.append("video_id", this.data.playlistVideo.video_id);
+      form.append("playlist_id", this.data.playlist_video.playlist_id);
+      form.append("video_id", this.data.playlist_video.video_id);
 
 
       await PlaylistService.adicionarVideoNaPlaylist(form);
 
-      this.playlistList = await this.listarPlaylist([]);
+      this.playlist_list = await this.listarPlaylist([]);
 
       this.closeDialog();
       this.data.playlist.titulo = '';
@@ -316,47 +338,54 @@ export default defineComponent({
     }
   },
 
-
-
     async addVideoNaPlaylist(id: any) {
       try {
-        if (!this.selectedPlaylistId) return;
+        if (!this.selected_playlist_id) return;
 
-        this.data.playlistVideo.playlist_id = String(this.selectedPlaylistId);
-        this.data.playlistVideo.video_id = String(this.data.video.video_id);
+        this.data.playlist_video.playlist_id = String(this.selected_playlist_id);
+        this.data.playlist_video.video_id = String(this.data.video.video_id);
 
-        this.closeDialog();
+       
 
         const form = new FormData();
-        form.append("playlist_id", String(this.data.playlistVideo.playlist_id));
-        form.append("video_id", String(this.data.playlistVideo.video_id));
+        form.append("playlist_id", String(this.data.playlist_video.playlist_id));
+        form.append("video_id", String(this.data.playlist_video.video_id));
 
         PlaylistService.adicionarVideoNaPlaylist(form)
           .then(res => console.log(res))
           .catch(err => console.error(err));
+
+         this.closeDialog();
+         console.log( this.is_dialog_open);
+         
       } catch (error) {
         console.log('ERROR: ', error);
       }
     },
 
-
     async listarPlaylist(items: any) {
       try {
-        //console.log(this.data.playlist.usuario_id);
-        
-        const response = await PlaylistService.listarPlaylistsPorUsuario(Number(this.data.playlist.usuario_id))
+        const response = await PlaylistService.listarPlaylistsPorUsuario(Number(this.data.playlist.usuario_id));
 
-        //console.log("items: ", response);
-         items = response.data.map((item: any) => ({
+        const playlists = response.data.map((item: any) => ({
           id: item.playlist_id,
           titulo: item.titulo,
         }));
-                
-        return items;
 
-      }catch (error) {
+        this.video_in_playlists = [];
+
+        for (const playlist of response.data) {
+          const videos = await PlaylistService.listarVideosDaPlaylist(playlist.playlist_id);
+          const videoIds = videos.data.map((v: any) => v.video_id);
+
+          if (videoIds.includes(this.data.video.video_id)) {
+            this.video_in_playlists.push(playlist.playlist_id);
+          }
+        }
+
+        return playlists;
+      } catch (error) {
         console.log('ERROR: ', error);
-        
       }
     },
 
@@ -366,7 +395,7 @@ export default defineComponent({
 
     initialDialog() {
       this.step = 'selecionar';
-      this.isDialogOpen = true;
+      this.is_dialog_open = true;
     },
 
     handleImageUpload(event: Event) {
@@ -376,6 +405,77 @@ export default defineComponent({
         this.data.playlist.imagem = files[0];
       }
     },
+
+    async carregarComentarios(items: any) {
+      console.log(this.id);
+      
+      try {
+        const response = await ComentarioService.listarComentariosPorVideo(this.id);
+
+        items = response.dados.map((item: any) => ({
+          conteudo: item.conteudo,
+          comentario_id: item.comentario_id,
+          video_id: item.video_id,
+          nome_completo: item.nome_completo,
+          foto_perfil: item.foto_perfil,
+          usuario_id: item.usuario_id
+        }));
+        console.log(response);
+        
+        return items
+      } catch (error) {
+        console.error('Erro ao carregar comentários:', error);
+      }
+    },
+
+    async addComentario() {
+      if (!this.novo_comentario.trim()) return;
+
+      const formData = new FormData();
+      formData.append("video_id", String(this.data.video.video_id));
+      formData.append("usuario_id", String(this.usuario_atual.usuario_id));
+      formData.append("conteudo", this.novo_comentario);
+
+      try {
+        await ComentarioService.adicionarComentario(formData);
+        this.novo_comentario = '';
+        this.comentarios = await this.carregarComentarios(this.comentarios);
+      } catch (error) {
+        console.error("Erro ao adicionar comentário:", error);
+      }
+    },
+
+    async excluirComentario(id: number) {
+      try {
+        const usuario = Number(this.data.playlist.usuario_id);
+        await ComentarioService.excluirComentario(id, usuario);
+
+        this.comentarios = this.comentarios.filter(comentario => comentario.comentario_id !== id);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+
+    async toggleVideoInPlaylist(playlistId: number, checked: boolean) {
+      const form = new FormData();
+      form.append("playlist_id", String(playlistId));
+      form.append("video_id", String(this.data.video.video_id));
+
+      try {
+        if (checked) {
+          await PlaylistService.adicionarVideoNaPlaylist(form);
+          this.video_in_playlists.push(playlistId);
+        } else {
+          await PlaylistService.removerVideoDaPlaylist(playlistId, this.id);
+          this.video_in_playlists = this.video_in_playlists.filter(id => id !== playlistId);
+        }
+      } catch (error) {
+        console.error("Erro ao atualizar vídeo na playlist:", error);
+      }
+    }
+
+
+    
     
   }
 });
@@ -427,7 +527,7 @@ export default defineComponent({
           
         </div>
         <div>
-              <AlertDialog v-model:open="isDialogOpen">
+              <AlertDialog v-model:open="is_dialog_open">
                 <AlertDialogTrigger as-child>
                  
                     <div class="flex flex-col items-center" @click="initialDialog" style="cursor: pointer;">
@@ -447,18 +547,20 @@ export default defineComponent({
                     </AlertDialogHeader>
 
                     <Separator orientation="horizontal"/>
-
+                    
                    <div class="space-y-2 my-5">
                       <div
-                        v-for="(playlist, index) in playlistList"
+                        v-for="(playlist, index) in playlist_list"
                         :key="index"
                         class="flex items-center space-x-2"
                       >
                       <Checkbox
                         :id="`playlist-${index}`"
-                        :modelValue="selectedPlaylistId === playlist.id"
-                        @update:modelValue="(val) => selectedPlaylistId = val ? playlist.id : null"
+                        :modelValue="video_in_playlists.includes(playlist.id)"
+                        @update:modelValue="(checked) => toggleVideoInPlaylist(playlist.id, checked)"
                       />
+
+
 
                         <label
                           :for="`playlist-${index}`"
@@ -470,16 +572,16 @@ export default defineComponent({
                     </div>
 
                     <div class="flex mt-3">
-                          <Button class="mr-2" @click="closeDialog">Cancelar</Button>
-                          <Button  @click="addVideoNaPlaylist">Adicionar a playlist</Button>
-                      </div>
-
+                    </div>
+                    
                     <Separator orientation="horizontal"/>
                     
                     <AlertDialogFooter>
-                     
-                      <div>
-                            <Button variant="ghost" @click="openCriar">Criar nova playlist</Button>
+                      
+                      <div class="mt-2 flex w-full justify-between">
+                        <Button class="mr-2" @click="closeDialog">Sair</Button>
+                      
+                            <Button @click="openCriar">Criar nova playlist</Button>
 
                       </div>
                         
@@ -563,7 +665,7 @@ export default defineComponent({
       </div>
     </div>
    
-    <div class="mt-10 px-5">
+    <!-- <div class="mt-10 px-5">
 
       <h3 class="text-xl font-semibold mb-4">Vídeos Relacionados</h3>
 
@@ -596,8 +698,65 @@ export default defineComponent({
 
       </div>
     </div>
-</div>
+</div> -->
 
+  <div>
+      <div class="mt-10 px-5">
+        <h3 class="text-xl font-semibold mb-4">Comentários</h3>
+
+       
+        <form @submit.prevent="addComentario" class="mb-6">
+          <div class="flex flex-col gap-2">
+            <label for="novo_comentario">Adicionar comentário:</label>
+            <Input
+              id="novo_comentario"
+              v-model="novo_comentario"
+              placeholder="Escreva seu comentário..."
+              class="w-full"
+            />
+            <Button type="submit" class="w-fit">Enviar</Button>
+          </div>
+        </form>
+
+       
+        <div class="space-y-4">
+          <div
+            v-for="(comentario, index) in comentarios"
+            :key="index"
+            class="p-4 border rounded-lg shadow-sm bg-gray-50 flex"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <div >
+                
+                <img
+                  v-if="comentario.foto_perfil"
+                  :src="`http://localhost:8000/uploads/${comentario.foto_perfil}`"
+                  alt="Thumbnail"
+                  class="mt-2 h-auto w-[63px] object-cover rounded-full"
+                />
+                 <Avatar v-else  class="h-auto w-[53px] flex items-center justify-center">
+                    <AvatarImage src="https://github.com/unovue.png" alt="@unovue" class="" />
+                    <AvatarFallback>CN</AvatarFallback>
+                  </Avatar>
+              </div>
+            </div>
+          
+            <div class="flex justify-between w-full items-center ml-4">
+              <div>
+                <p class="text-[12px]">{{ comentario.nome_completo }}</p>
+                <p class="text-base">{{ comentario.conteudo }}</p>
+                
+              </div>
+              <Trash style="cursor: pointer;" @click="excluirComentario(comentario.comentario_id)" v-if="data.usuario_id == comentario.usuario_id"/>
+            </div>
+          </div>
+        </div>
+        <!-- <div v-else>
+          <p class="text-gray-500">Nenhum comentário ainda.</p>
+        </div> -->
+      </div>
+
+  </div>
   </div>
   
 </template>

@@ -33,6 +33,8 @@ import { SquarePenIcon, Trash, Trash2, LucideEdit } from 'lucide-vue-next';
 import { UserService } from '@/services/user.service';
 import Separator from '@/components/ui/separator/Separator.vue';
 import router from '@/routes';
+import { Eye, EyeClosed } from 'lucide-vue-next'
+
   
   export default defineComponent({
     components:{
@@ -61,6 +63,8 @@ import router from '@/routes';
       Button,
       Separator,
       LucideEdit,
+      Eye,
+      EyeClosed,
     },
     data() {
       return {
@@ -75,21 +79,27 @@ import router from '@/routes';
           genero: '',
           biografia: '',
         },
-        usuarioOriginal: {} as any,
-        confirmarSenha: '',
+        usuario_original: {} as any,
+        confirmar_senha: '',
         genero: {
           
         },
         rio,
-        defaultImg: '/img/default-user.jpg',
-        novaSenha: '',
+        default_img: '/img/default-user.jpg',
+        nova_senha: '',
+        mostrar_nova_senha: false,
+        mostrar_confirmar_senha: false,
+        erros: {
+          confirmar_senha: '',
+          senha: ''
+        },
       };
     },
     mounted() { 
     UserService.perfil()
       .then(user => {
         this.usuario = user.usuario;
-         this.usuarioOriginal = { ...user.usuario }; 
+         this.usuario_original = { ...user.usuario }; 
         //console.log('user: ', this.usuario);
         
       })
@@ -99,30 +109,33 @@ import router from '@/routes';
       });
     },
     methods: {
-     async atualizarUsuario() {
+      async atualizarUsuario() {
         try {
           const formData = new FormData();
 
           for (const key in this.usuario) {
-            if (key === 'foto_perfil' || key === 'senha') continue;
-            const novoValor = this.usuario[key];
-            const valorOriginal = this.usuarioOriginal[key];
+            if (key === 'foto_perfil') continue;
 
+            const novoValor = this.usuario[key];
+            const valorOriginal = this.usuario_original[key];
+
+            // Checa se o valor foi alterado
             if (novoValor !== valorOriginal && novoValor !== undefined) {
               formData.append(key, novoValor);
             }
           }
 
-          if (this.novaSenha || this.confirmarSenha) {
-            if (this.novaSenha !== this.confirmarSenha) {
-              alert('As senhas não coincidem.');
-              return;
-            }
-            formData.append('senha', this.novaSenha);
+          if (this.nova_senha || this.confirmar_senha) {
+            if (!this.validarCampos()) return;
+
+            formData.append('senha', this.nova_senha);
           }
 
-          if (this.usuario.foto_perfil && this.usuario.foto_perfil !== this.usuarioOriginal.foto_perfil) {
-            formData.append('foto_perfil', this.usuario.foto_perfil as File);
+          if (
+            this.usuario.foto_perfil &&
+            this.usuario.foto_perfil !== this.usuario_original.foto_perfil
+          ) {
+            formData.append('foto_perfil', this.usuario.foto_perfil);
           }
 
           if ([...formData.keys()].length === 0) {
@@ -140,11 +153,10 @@ import router from '@/routes';
             }
           );
 
-          alert("Usuário atualizado com sucesso!");
-          this.usuarioOriginal = { ...this.usuario };
-          this.novaSenha = '';
-          this.confirmarSenha = '';
-          window.location.reload(); 
+          this.usuario_original = { ...this.usuario };
+          this.nova_senha = '';
+          this.confirmar_senha = '';
+          window.location.reload();
           return response;
 
         } catch (error) {
@@ -168,8 +180,36 @@ import router from '@/routes';
             return response;
         })
         .catch((error) => console.log())
+      },
+
+      mostrarSenha() {
+        this.mostrar_nova_senha = !this.mostrar_nova_senha;
+      },
+
+      mostrarConfirmar_senha() {
+        this.mostrar_confirmar_senha = !this.mostrar_confirmar_senha;
+      },
+
+      
+     validarCampos() {
+        let valido = true
+        this.erros.confirmar_senha = ''
+        this.erros.senha = ''
+
+        if (this.nova_senha !== this.confirmar_senha) {
+            this.erros.confirmar_senha = 'As senhas não coincidem'
+            valido = false
+        }
+
+        const senhaRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/
+        if (!senhaRegex.test(this.nova_senha)) {
+            this.erros.senha = 'Senha inválida. Deve conter pelo menos 8 caracteres, uma letra maiúscula e um número.'
+            valido = false
+        }
+
+        return valido
+      },
       }
-    }
   });
   </script>
 
@@ -328,25 +368,44 @@ import router from '@/routes';
           </TabsContent>
           <TabsContent value="password" class="w-full">
             <div class="w-[50vw]">
-                 <div class="pt-3">
+                  <div class="pt-3 w-[90%] relative">
                     <Label>NOVA SENHA</Label>
                     <Input
-                      type="password"
-                      class="mt-3"
-                      placeholder="Nova senha"
-                      v-model="novaSenha"
+                        :type="mostrar_nova_senha ? 'text' : 'password'"
+                        class="mt-3 pr-10"
+                        placeholder="Nova senha"
+                        v-model="nova_senha"
                     />
+                    <button
+                        type="button"
+                        class="absolute right-2 top-[47px] text-gray-500 mt-2"
+                        @click="mostrarSenha()"
+                    >
+                        <EyeClosed v-if="mostrar_nova_senha" />
+                        <Eye v-else/>
+                        
+                    </button>
                   </div>
+                  <p v-if="erros.senha" class="text-red-500 text-sm pl-3 pt-1">{{ erros.senha }}</p>
 
-                  <div class="pt-3 w-[90%]">
+                  <div class="pt-3 w-[90%] relative">
                     <Label>CONFIRMAR SENHA</Label>
                     <Input
-                      type="password"
-                      class="mt-3"
-                      placeholder="Confirmar senha"
-                      v-model="confirmarSenha"
+                        :type="mostrar_confirmar_senha ? 'text' : 'password'"
+                        class="mt-3 pr-10"
+                        placeholder="Confirmar senha"
+                        v-model="confirmar_senha"
                     />
+                    <button
+                      type="button"
+                      class="absolute right-2 top-[47px] text-gray-500 flex justify-center mt-2"
+                      @click="mostrarConfirmar_senha"
+                    >
+                      <EyeClosed v-if="mostrar_confirmar_senha" />
+                      <Eye v-else/>
+                  </button>
                   </div>
+                  <p v-if="erros.confirmar_senha" class="text-red-500 text-sm pl-3 pt-1">{{ erros.confirmar_senha }}</p>
             </div>
            
 

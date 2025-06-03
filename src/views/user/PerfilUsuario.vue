@@ -40,7 +40,17 @@ import {
   AvatarImage,
 } from '@/components/ui/avatar'
 import { PlaylistService } from '@/services/playlist.service';
-  
+import { SeguidoresService } from '@/services/seguidores.service';
+ import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+
 interface Video {
   id: number;
   usuario_id: number;
@@ -57,6 +67,13 @@ interface Playlist {
     titulo: string,
     imagem: string,
     status: string
+}
+
+interface Seguidores {
+  usuario_id: number,
+  foto_perfil: string,
+  nome_completo: string,
+  username: string
 }
 
   export default defineComponent({
@@ -90,6 +107,13 @@ interface Playlist {
       Avatar,
       AvatarFallback,
       AvatarImage,
+      Dialog,
+      DialogContent,
+      DialogDescription,
+      DialogFooter,
+      DialogHeader,
+      DialogTitle,
+      DialogTrigger,
     },
     data() {
       return {
@@ -115,6 +139,7 @@ interface Playlist {
         playlists: [] as Playlist[],
         id: 0,
         editar: false,
+        seguidores: [] as Seguidores[],
       };
     },
     async mounted() { 
@@ -127,10 +152,13 @@ interface Playlist {
           const response = await UserService.getUserById(Number(this.id));
           this.usuario = response;
           this.videos = await this.getVideosById(this.id);
+          console.log('videos: ', this.videos);
+          
 
           const item = await UserService.perfil();
           this.userIdPerfil = item.usuario.usuario_id
           console.log(item);
+          console.log(`id do perfil: ${id} - id do usuario ${this.userIdPerfil}`);
           
           
           this.ButtonEditar()
@@ -141,7 +169,7 @@ interface Playlist {
           router.push({ name: 'Home' })
         }
 
-        
+        this.seguidores = await this.listarSeguidores(this.seguidores)
     },
     methods: {
       async loadUser(item:number) {
@@ -158,18 +186,20 @@ interface Playlist {
         this.seguindo = !this.seguindo;
       },
       async getVideosById(id: number) {
-        try {
         
-            const response = await VideoService.listarVideosPorUsuario(id)
-            const data = await response.data.map((item:any) => ({
-                id: item.video_id,
-                usuario_id: item.usuario_id,
-                nome: item.nome,
-                imagem: item.imagem,
-                visualizacoes: item.visualizacoes,
-                nome_usuario: item.nome_usuario,
-              
-        }))
+        try {
+          
+          const response = await VideoService.listarVideosPorUsuario(id)
+          const data = await response.data.map((item:any) => ({
+            id: item.video_id,
+            usuario_id: item.usuario_id,
+            nome: item.nome,
+            imagem: item.imagem,
+            visualizacoes: item.visualizacoes,
+            nome_usuario: item.nome_usuario,
+            
+          }))
+          console.log('dentro dos videos', data);
             
             return data;
         
@@ -230,7 +260,53 @@ interface Playlist {
         if (status == "ativo") {
           return
         }
+      },
+
+      async seguirUsuario() {
+        try{
+          const response = await SeguidoresService.seguir(this.userIdPerfil, this.id)   
+          this.seguindo = true
+          return response
+        }catch(error) {
+          console.log(error);
+          alert('ocorreu um erro ao tentar seguir usuario')
+        }
+      },
+
+      async deixarDeSeguir() {
+         try{
+          const response = await SeguidoresService.deixarDeSeguir(this.userIdPerfil, this.id)   
+          this.seguindo = true
+          this.seguindo = false
+          return response
+        }catch(error) {
+          console.log(error);
+          alert('ocorreu um erro ao tentar deixar de seguir usuario')
+        }
+      },
+
+      async listarSeguidores(items: any) {
+        try {
+          const response = await SeguidoresService.listarSeguidoresPorId(this.id);
+
+          const seguidores = response.seguidores.map((item: any) => ({
+            usuario_id: item.usuario_id,
+            nome_completo: item.nome_completo,
+            username: item.username,
+            foto_perfil: item.foto_perfil
+          }));
+
+          // Verificar se o usuário logado é um dos seguidores
+          this.seguindo = seguidores.some(seguidor => seguidor.usuario_id === this.userIdPerfil);
+
+          console.log('Está seguindo?', this.seguindo);
+          
+          return seguidores;
+        } catch (error) {
+          console.log(error);
+        }
       }
+
     }
   });
   </script>
@@ -267,10 +343,53 @@ interface Playlist {
 
             <Separator orientation="vertical" class="mx-10 "/>
 
-             <div class="flex flex-col items-center">
-              <p class="text-3xl mb-3">45</p>
-              <p class="text-gray-600">Seguidores</p>
-            </div>
+            
+             <Dialog>
+                <DialogTrigger as-child>
+                  <div class="flex flex-col items-center" style="cursor: pointer;">
+                    <p class="text-3xl mb-3">45</p>
+                    <p class="text-gray-600">Seguidores</p>
+                  </div>
+                </DialogTrigger>
+                <DialogContent class="sm:max-w-[400px] py-5">
+                  <DialogHeader>
+                    <DialogTitle>Seguidores</DialogTitle>
+                   
+                  </DialogHeader>
+                  <div v-for="seguidor in seguidores" class="m-0">
+                    <div class="grid grid-cols-5 gap-2 py-4 ml-[-15px]">
+                      <div class="flex justify-end">
+                         <img
+                            v-if="seguidor.foto_perfil"
+                            :src="`http://localhost:8000/uploads/${seguidor.foto_perfil}`"
+                            alt="Thumbnail"
+                            class="mt-2 h-auto w-[53px] object-cover rounded-full"
+                          />
+                          <Avatar v-else  class="h-auto w-[53px] flex items-center justify-center">
+                              <AvatarImage src="https://github.com/unovue.png" alt="@unovue" class="" />
+                              <AvatarFallback>CN</AvatarFallback>
+                            </Avatar>
+                      </div>
+                      <div class=" col-span-3 flex justify-center flex-col">
+                        <p class="text-[12px] font-bold">{{ seguidor.username }}</p>
+                         <p>{{ seguidor.nome_completo }}</p>
+                      </div>
+                      <div class="flex items-center ml-[-10px]">
+                        <div v-if="seguidor.usuario_id !== userIdPerfil">
+                          <div v-if="seguindo" class="">
+                            <Button class="bg-[#7E57C2]" @click="deixarDeSeguir()">Seguindo</Button>
+                          </div>
+                          
+                          <div v-else class="">
+                              <Button class="bg-[#5A3A93]" @click="seguirUsuario()">Seguir</Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                 
+                </DialogContent>
+              </Dialog>
 
             <Separator orientation="vertical" class="ml-10"/>
 
@@ -288,11 +407,11 @@ interface Playlist {
         </div>
         <div v-else>
            <div v-if="seguindo" class="flex mt-10">
-              <Button class="bg-[#7E57C2]" @click="handleFollow()">Seguir</Button>
+              <Button class="bg-[#7E57C2]" @click="deixarDeSeguir()">Seguindo</Button>
             </div>
             
             <div v-else class="flex mt-10">
-                <Button class="bg-[#5A3A93]" @click="handleFollow()">Seguindo</Button>
+                <Button class="bg-[#5A3A93]" @click="seguirUsuario()">Seguir</Button>
             </div>
         </div>
        

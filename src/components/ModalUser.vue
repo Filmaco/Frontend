@@ -79,57 +79,70 @@ export default defineComponent({
         try {
             const response = await UserService.getUserById(id)
             this.usuario = response
+            this.usuario.senha = ''
         } catch (error) {
             console.error('Erro ao buscar usuário por ID:', error)
         }
     },
 
-     async validarCampos() {
-        if (this.usuario.senha && this.confirmar_senha && this.usuario.senha !== this.confirmar_senha) {
+     validarCampos() {
+        let valido = true
+        this.erros.confirmar_senha = ''
+        this.erros.senha = ''
+
+        if (this.usuario.senha !== this.confirmar_senha) {
             this.erros.confirmar_senha = 'As senhas não coincidem'
+            valido = false
         }
 
-      const senhaRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/
-      if (this.usuario.senha && !senhaRegex.test(this.usuario.senha)) {
-        this.erros.senha = 'Senha inválida. Deve conter pelo menos 8 caracteres, uma letra maiúscula e um número.'
-      }
-    },
+        const senhaRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/
+        if (!senhaRegex.test(this.usuario.senha)) {
+            this.erros.senha = 'Senha inválida. Deve conter pelo menos 8 caracteres, uma letra maiúscula e um número.'
+            valido = false
+        }
+
+        return valido
+        },
+
 
     async alterarSenha() {
-        
         try {
+            this.submit = true
 
-            this.submit = true;
-            if (!this.validarCampos()) return;
-            if (!this.usuario.senha || !this.confirmar_senha) {
-            this.mensagem_erro_senha = 'Preencha ambos os campos de senha.';
-            return;
+            if (!this.validarCampos()) {
+            return
             }
 
+            if (!this.usuario.senha || !this.confirmar_senha) {
+            this.mensagem_erro_senha = 'Preencha ambos os campos de senha.'
+            return
+            }
 
-            const formData = new FormData();
-            formData.append('senha', this.usuario.senha);
+            const formData = new FormData()
+            formData.append('senha', this.usuario.senha)
 
             const response = await UserService.editar(formData, this.usuario.usuario_id)
 
-            this.mensagem_sucesso_senha = 'Senha alterada com sucesso!';
-            this.mensagem_erro_senha = '';
-            this.usuario.senha = '';
-            this.confirmar_senha = '';
-            return response;
+            this.mensagem_sucesso_senha = 'Senha alterada com sucesso!'
+            this.mensagem_erro_senha = ''
+            this.usuario.senha = ''
+            this.confirmar_senha = ''
+            return response
 
         } catch (error) {
-            this.mensagem_erro_senha = 'Erro ao alterar a senha.';
-            this.mensagem_sucesso_senha = '';
-            console.error(error);
+            this.mensagem_erro_senha = 'Erro ao alterar a senha.'
+            this.mensagem_sucesso_senha = ''
+            console.error(error)
         }
-    },
+        },
 
     mostrarSenha() {
         this.mostrar_nova_senha = !this.mostrar_nova_senha;
     },
 
-   
+    mostrarConfirmarSenha() {
+        this.mostrar_confirmar_senha = !this.mostrar_confirmar_senha;
+    },
 
 
   }
@@ -245,9 +258,9 @@ export default defineComponent({
                                 <button
                                     type="button"
                                     class="absolute right-2 top-[47px] text-gray-500 flex justify-center mt-2"
-                                    @click="mostrar_confirmar_senha = !mostrar_confirmar_senha"
+                                    @click="mostrarConfirmarSenha"
                                 >
-                                    <EyeClosed v-if="mostrar_nova_senha" />
+                                    <EyeClosed v-if="mostrar_confirmar_senha" />
                                     <Eye v-else/>
                                 </button>
                             </div>

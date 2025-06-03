@@ -131,6 +131,7 @@ export default defineComponent({
       const id = response.usuario_id
       console.log("id: ",id , " - ", response);
       router.push({ name: 'Usuario.Perfil', params: { id } })
+      // window.location.reload()
     }
     catch (e) {
       console.log('EEROR: ',e);
