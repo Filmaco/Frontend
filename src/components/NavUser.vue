@@ -53,7 +53,7 @@ async function logout() {
 
  async function goToPerfil(id:number) {
   
-    router.push({ name: 'Usuario.Perfil', params: { id } })
+    router.push({ name: 'Usuario.Meu.Perfil'})
 }
 
 </script>
@@ -97,18 +97,9 @@ async function logout() {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <Sparkles />
-              Upgrade to Pro
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
+
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <BadgeCheck />
-              Account
-            </DropdownMenuItem>
             <DropdownMenuItem @click="goToPerfil(user.usuario_id)">
               <User />
               Perfil
@@ -121,7 +112,7 @@ async function logout() {
           <DropdownMenuSeparator />
           <DropdownMenuItem  @click="logout">
             <LogOut />
-            Log out
+            Sair
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

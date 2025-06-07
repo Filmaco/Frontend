@@ -88,6 +88,7 @@ import FilePondPluginImagePreview from 'filepond-plugin-image-preview';
 import 'filepond/dist/filepond.min.css';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 import { CloudUpload, User } from 'lucide-vue-next';
+import { AvaliacaoService } from '@/services/avaliacao.service';
 
 FilePond.registerPlugin(FilePondPluginImagePreview);
 
@@ -199,7 +200,15 @@ export default defineComponent({
       comentarios: [] as Comentarios[],
       novo_comentario: '',
       usuario_atual: null as any,
-
+      avaliacoes: {
+        usuario_id: '',
+        video_id: '',
+        avaliacao: ''
+      },
+      edit_avaliacao: {
+        avaliacao_id: null as (number | null),
+        avaliacao: ''
+      }
     };
   },
 
@@ -229,6 +238,7 @@ export default defineComponent({
     
     console.log( this.is_dialog_open);
     
+    AvaliacaoService.listarAvaliacaoPorVideo(this.id)
     
   },
 
@@ -291,9 +301,6 @@ export default defineComponent({
       router.push({ name: 'Video.Visualizar', params: { id } })
     },
 
-    toggleIcon(type: 'like' | 'dislike' | 'love') {
-      this.activeIcon = this.activeIcon === type ? null : type;
-    },
 
     closeDialog() {
       this.is_dialog_open = false;
@@ -472,9 +479,72 @@ export default defineComponent({
       } catch (error) {
         console.error("Erro ao atualizar vídeo na playlist:", error);
       }
+    },
+
+   toggleIcon(type) {
+    const tipoParaNumero = {
+      dislike: 1,
+      like: 2,
+      love: 3,
+    };
+
+    const valorNumerico = tipoParaNumero[type];
+
+    if (this.activeIcon === type && this.edit_avaliacao.avaliacao_id) {
+      this.activeIcon = null;
+      this.deletarAvaliacao(); 
+      return;
     }
 
+    this.activeIcon = type;
 
+    if (this.edit_avaliacao.avaliacao_id) {
+      this.editarAvaliacao(valorNumerico);
+    } else {
+      this.addAvaliacao(valorNumerico);
+    }
+  },
+
+    async addAvaliacao(valor) {
+      const formData = new FormData();
+      formData.append('usuario_id', String(this.data.usuario_id));
+      formData.append('video_id', String(this.id));
+      formData.append('avaliacao', valor); 
+      try {
+        const response = await AvaliacaoService.criarAvaliacao(formData);
+        console.log(response);
+        
+        this.edit_avaliacao.avaliacao_id = response.id; 
+        alert("Avaliação adicionada");
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao adicionar avaliação");
+      }
+    },
+
+    async editarAvaliacao(valor) {
+      const formData = new FormData();
+      formData.append('avaliacao', valor);
+
+      try {
+        await AvaliacaoService.editarAvaliacao(this.edit_avaliacao.avaliacao_id, formData);
+        alert("Avaliação atualizada");
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao editar avaliação");
+      }
+    },
+
+    async deletarAvaliacao() {
+      try {
+        await AvaliacaoService.deletarAvaliacao(this.edit_avaliacao.avaliacao_id);
+        this.edit_avaliacao.avaliacao_id = null;
+        alert("Avaliação removida");
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao remover avaliação");
+      }
+    }
     
     
   }

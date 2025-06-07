@@ -31,6 +31,19 @@ const VideoService = new class{
             })  
     }
 
+    public listarVideosAtivosPorUsuario (id:number) {
+        console.log('id',id);
+        
+        return new Promise<any>((resolve, reject) => {         
+            axios.get(`${API_URL}/usuario/ativos/${id}`)
+                .then(response => {
+                    resolve(response.data)
+                })
+                .catch((error: AxiosError) => reject(error))
+                
+            })  
+    }
+
     // public inativarVideo(id:number) {
     //     return new Promise<any>((resolve, reject) => {         
     //         axios.put(`${API_URL}/status/${id}`)

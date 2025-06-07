@@ -51,7 +51,6 @@ import { SeguidoresService } from '@/services/seguidores.service';
   DialogTrigger,
 } from '@/components/ui/dialog'
 import EstatisticaService from '@/services/estatistica.service';
-import { AvaliacaoService } from '@/services/avaliacao.service';
 
 interface Video {
   id: number;
@@ -142,12 +141,6 @@ interface Seguidores {
         id: 0,
         editar: false,
         seguidores: [] as Seguidores[],
-        usuarioLogado: {
-            usuario_id: 0,
-            nome_completo: '',
-            username: '',
-            foto_perfil: null as string | null
-        },
         estatisticas: {
             total_videos: 0,
             total_seguidores: 0,
@@ -159,15 +152,26 @@ interface Seguidores {
     async mounted() { 
      
         try {
-          const id = parseInt(this.$route.params.id as string);
-          this.id = id;
-          
-          const response = await UserService.getUserById(Number(this.id));
-          this.usuario = response;
-          this.videos = await this.getVideosById(this.id);
-          console.log('videos: ', this.videos);
-          
-           const item_estatistica = await EstatisticaService.estatisticasPorUsuario(this.usuario.usuario_id)
+            const id = parseInt(this.$route.params.id as string);
+            this.id = id;
+            
+           
+            const item = await UserService.perfil();
+            //   this.id = item.usuario.usuario_id;
+            this.usuario = {
+                usuario_id: item.usuario.usuario_id,
+                nome_completo: item.usuario.nome_completo,
+                username: item.usuario.username,
+                foto_perfil: item.usuario.foto_perfil,
+                email: item.usuario.email,
+                senha: item.usuario.senha,
+                data_nascimento: item.usuario.data_nascimento,
+                genero: item.usuario.genero,
+                biografia: item.usuario.biografia
+            };
+            this.videos = await this.getVideosById(this.usuario.usuario_id);
+            
+            const item_estatistica = await EstatisticaService.estatisticasPorUsuario(this.usuario.usuario_id)
             
 
             this.estatisticas = {
@@ -175,41 +179,18 @@ interface Seguidores {
                 total_seguidores: item_estatistica.estatisticas.total_seguidores,
                 total_seguidos: item_estatistica.estatisticas.total_seguidos
             }
-
-          const item = await UserService.perfil();
-          this.userIdPerfil = item.usuario.usuario_id;
-          this.usuarioLogado = {
-            usuario_id: item.usuario.usuario_id,
-            nome_completo: item.usuario.nome_completo,
-            username: item.usuario.username,
-            foto_perfil: item.usuario.foto_perfil
-          };
-          
-          
-          this.ButtonEditar()
-          this.playlists = await this.loadPlaylist(this.playlists)
+            
+            this.ButtonEditar()
+            this.playlists = await this.loadPlaylist(this.playlists)
 
         } catch (e) {
-          console.log('Erro ao buscar perfil:', e);
-          router.push({ name: 'Home' })
+            console.log('Erro ao buscar perfil:', e);
+            router.push({ name: 'Home' })
         }
 
         this.seguidores = await this.listarSeguidores(this.seguidores)
     },
     methods: {
-      async loadUser(item:number) {
-        try {
-           
-            return item;
-
-        } catch (error) {
-        console.error('Erro ao pegar informacoes do usuario:', error);
-      }
-      },
-
-      handleFollow() {
-        this.seguindo = !this.seguindo;
-      },
 
       async getVideosById(id: number) {
         
@@ -238,30 +219,29 @@ interface Seguidores {
         router.push({ name: 'Video.Visualizar', params: { id } })
       },
 
-      async goToPagePlaylistWithId(id:number) {
+       async goToPagePlaylistWithId(id:number) {
         router.push({ name: 'Playlist.Id', params: { id } })
       },
 
       async goToPerfilWithId(name:string) {
           const response = UserService.getUserByName(name);
-          return response;
-        
+          return response; 
       },
 
       ButtonEditar() {
-          if(this.userIdPerfil == this.usuario.usuario_id) {
+          if(this.id == this.usuario.usuario_id) {
             this.editar = true;
-            console.log("true",this.editar, ' - ', ' - ', this.userIdPerfil, this.usuario.usuario_id);
+            console.log("true",this.editar, ' - ', ' - ', this.id, this.usuario.usuario_id);
             
           }
           else { 
             this.editar = false;
-              console.log("false",this.editar, ' - ', ' - ', this.userIdPerfil, this.usuario.usuario_id);
+              console.log("false",this.editar, ' - ', ' - ', this.id, this.usuario.usuario_id);
            }
       },
 
       goTo() {
-        router.push(`/editar/${this.userIdPerfil}`)
+        router.push(`/editar/${this.id}`)
       },
 
       async loadPlaylist(items:any) {
@@ -292,45 +272,9 @@ interface Seguidores {
         }
       },
 
-      async seguirUsuario() {
-        try {
-          const response = await SeguidoresService.seguir(this.userIdPerfil, this.id);
-          this.seguindo = true;
-
-          this.seguidores.push({
-            ...this.usuarioLogado,
-            foto_perfil: this.usuarioLogado.foto_perfil ?? '' 
-          });
-
-          this.estatisticas.total_seguidores++;
-
-          return response;
-        } catch (error) {
-          console.log(error);
-          alert('ocorreu um erro ao tentar seguir usuario');
-        }
-      },
-
-      async deixarDeSeguir() {
-        try {
-          const response = await SeguidoresService.deixarDeSeguir(this.userIdPerfil, this.id);
-
-          this.seguindo = false;
-
-          this.seguidores = this.seguidores.filter(seguidor => seguidor.usuario_id !== this.userIdPerfil);
-
-           this.estatisticas.total_seguidores--;
-
-          return response;
-        } catch (error) {
-          console.log(error);
-          alert('ocorreu um erro ao tentar deixar de seguir usuario');
-        }
-      },
-
       async listarSeguidores(items: any) {
         try {
-          const response = await SeguidoresService.listarSeguidoresPorId(this.id);
+          const response = await SeguidoresService.listarSeguidoresPorId(this.usuario.usuario_id);
 
           const seguidores = response.seguidores.map((item: any) => ({
             usuario_id: item.usuario_id,
@@ -339,7 +283,7 @@ interface Seguidores {
             foto_perfil: item.foto_perfil
           }));
 
-          this.seguindo = seguidores.some(seguidor => seguidor.usuario_id === this.userIdPerfil);
+          this.seguindo = seguidores.some(seguidor => seguidor.usuario_id === this.id);
 
           console.log('Está seguindo?', this.seguindo);
           
@@ -350,14 +294,10 @@ interface Seguidores {
       },
 
       goToPerfil(id: number) {
-       router.push({ name: 'Usuario.Perfil', params: { id } }).then(() => {
-          location.reload();
-        })
-
-        
-      },
-
-     
+        router.push({ name: 'Usuario.Perfil', params: { id } }).then(() => {
+            location.reload();
+            })
+      }
 
     }
   });
@@ -408,8 +348,8 @@ interface Seguidores {
                 <DialogContent class="sm:max-w-[400px] py-5">
                   <DialogHeader>
                     <DialogTitle>Seguidores</DialogTitle>
-                   
                   </DialogHeader>
+                  
                   <div v-for="seguidor in seguidores" class="m-0">
                     <div class="grid grid-cols-5 gap-2 py-4 ml-[-15px]">
                       <div class="flex justify-end"  @click="goToPerfil(seguidor.usuario_id)" style="cursor: pointer;">
@@ -431,15 +371,7 @@ interface Seguidores {
                          <p>{{ seguidor.nome_completo }}</p>
                       </div>
                       <div class="flex items-center ml-[-10px]">
-                        <div v-if="seguidor.usuario_id !== userIdPerfil">
-                          <div v-if="seguindo" class="">
-                            <Button class="bg-[#7E57C2]" @click="deixarDeSeguir()">Seguindo</Button>
-                          </div>
-                          
-                          <div v-else class="">
-                              <Button class="bg-[#5A3A93]" @click="seguirUsuario()">Seguir</Button>
-                          </div>
-                        </div>
+                        
                       </div>
                     </div>
                   </div>
@@ -450,39 +382,32 @@ interface Seguidores {
             <Separator orientation="vertical" class="ml-10"/>
 
              <div class="flex flex-col items-center">
-                <p class="text-3xl mb-3" v-if="estatisticas.total_seguidos">{{ estatisticas.total_seguidos }}</p>
-                <p class="text-3xl mb-3" v-else>0</p>
-                <p class="text-gray-600">Seguindo</p>
+              <p class="text-3xl mb-3" v-if="estatisticas.total_seguidos">{{ estatisticas.total_seguidos }}</p>
+                    <p class="text-3xl mb-3" v-else>0</p>
+                    <p class="text-gray-600">Seguindo</p>
             </div>
           </div>
         </div>
 
-        <div v-if="editar">
+        <div >
             <div class="flex mt-10">
               <Button class="bg-[#7E57C2]" @click="goTo()">Editar</Button>
-            </div>
-        </div>
-        <div v-else>
-           <div v-if="seguindo" class="flex mt-10">
-              <Button class="bg-[#7E57C2]" @click="deixarDeSeguir()">Seguindo</Button>
-            </div>
-            
-            <div v-else class="flex mt-10">
-                <Button class="bg-[#5A3A93]" @click="seguirUsuario()">Seguir</Button>
             </div>
         </div>
        
 
     </div>
- 
     <div class=" mt-10 p-5">
-      <Tabs default-value="videos" class="w-full mt-4">
-        <TabsList class="grid w-full grid-cols-2 border-none bg-transparent w-[200px]">
+      <Tabs default-value="seguidores" class="w-full mt-4">
+        <TabsList class="grid w-full grid-cols-3 border-none bg-transparent w-[300px]">
           <TabsTrigger value="videos" class="">
             Videos
           </TabsTrigger>
           <TabsTrigger value="playlist">
             Playlist
+          </TabsTrigger>
+           <TabsTrigger value="seguidores">
+            Seguidores
           </TabsTrigger>
         </TabsList>
         <TabsContent value="videos" class="w-full ">
@@ -533,7 +458,7 @@ interface Seguidores {
                   style="cursor: pointer;"
                   @click="goToPagePlaylistWithId(playlist.playlist_id)"
                 >
-                <div v-if="playlist.status == 'ativo'">
+                <div >
 
                   <div>
                     <img
@@ -556,7 +481,95 @@ interface Seguidores {
             
           </div>
         </TabsContent>
+        <TabsContent value="seguidores" class="w-full">
+          <div class="w-full" >
+
+            <Tabs default-value="seguidores" class="w-full mt-4">
+              <TabsList class="grid w-full grid-cols-1 border-none bg-transparent w-[100px]">
+                <TabsTrigger value="seguidores" class="">
+                  Seguidores
+                </TabsTrigger>
+                <TabsTrigger value="seguindo">
+                  Seguindo
+                </TabsTrigger>
+              </TabsList>
+              <TabsContent value="seguidores" class="w-full ml-[100px] ">
+                <div class="w-full  " >
+
+                  <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
+                      <div
+                        v-for="video in videos"
+                        :key="video.id"
+                        class="bg-white" 
+                        style="cursor: pointer;"
+                        @click="goToPageVideWithId(video.id)"
+                      >
+                        <div>
+                        
+                          <img
+                            v-if="video.imagem"
+                            :src="`http://localhost:8000/uploads/${video.imagem}`"
+                            alt="Thumbnail"
+                            class="mt-2 h-[190px] w-[443px] object-cover rounded-xl"
+                          />
+                        </div>
+                        <div class="flex mt-3 gap-4 items-center">
+                          <Avatar>
+                            <AvatarImage :src="`http://localhost:8000/uploads/${usuario.foto_perfil}`"/>
+                            <AvatarFallback>CN</AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <h3 class="font-bold text-base">{{ video.nome }}</h3>
+                            <p class="text-xs">{{ video.visualizacoes }} visualizações</p>
+                          </div>
+                        </div>
+
+                      </div>
+                    </div>
+                  
+                </div>
+                
+              </TabsContent>
+              <TabsContent value="seguindo" class="w-full">
+                <div class="w-full" >
+
+                  <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
+                      <div
+                        v-for="playlist in playlists"
+                        :key="playlist.playlist_id"
+                        class="bg-white" 
+                        style="cursor: pointer;"
+                        @click="goToPagePlaylistWithId(playlist.playlist_id)"
+                      >
+                      <div v-if="playlist.status == 'ativo'">
+
+                        <div>
+                          <img
+                            v-if="playlist.imagem"
+                            :src="`http://localhost:8000/uploads/${playlist.imagem}`"
+                            alt="Thumbnail"
+                            class="mt-2 h-[190px] w-[443px] object-cover rounded-xl"
+                          />
+                        </div>
+                        <div class="flex mt-3 gap-4 items-center">
+                          <div>
+                            <h3 class="font-bold text-base">{{ playlist.titulo }}</h3>
+                            <!-- <p class="text-xs">{{ playlist.visualizacoes }} visualizações</p> -->
+                          </div>
+                        </div>
+                      </div>
+
+                      </div>
+                    </div>
+                  
+                </div>
+              </TabsContent>
+            </Tabs>
+            
+          </div>
+        </TabsContent>
       </Tabs>
+      
   </div>
     
   </div>

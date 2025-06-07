@@ -100,6 +100,7 @@ export default defineComponent({
             nome_usuario: item.nome_usuario,
            
         }))
+        console.log(data);
         
         return data;
       } else {

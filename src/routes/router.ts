@@ -16,6 +16,8 @@ import Playlist from '@/views/playlist/Playlist.vue'
 import EditarPlaylist from '@/views/playlist/EditarPlaylist.vue'
 import HomeADM from '@/views/HomeADM.vue'
 import { UserService } from '@/services/user.service'
+import MeuPerfil from '@/views/user/MeuPerfil.vue'
+
 
 
 const routes: Array<RouteRecordRaw> = [
@@ -68,6 +70,13 @@ const routes: Array<RouteRecordRaw> = [
         path: 'perfil/:id',
         name: 'Usuario.Perfil',
         component: PerfilUsuario,
+        meta: {
+        }
+      },
+      {
+        path: 'meu/perfil',
+        name: 'Usuario.Meu.Perfil',
+        component: MeuPerfil,
         meta: {
         }
       },
