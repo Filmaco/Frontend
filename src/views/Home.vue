@@ -46,7 +46,8 @@ export default defineComponent({
       tags: [] as Tag[],
       videosByTag: [] as Video[],
       tagSelecionada: null as string | null,
-      tipo: ''
+      tipo: '',
+      id: 0
     };
   },
   async mounted() {
@@ -58,6 +59,7 @@ export default defineComponent({
     .then((response) => {
         console.log('perfil',response.usuario.tipo);
         this.tipo = response.usuario.tipo;
+        this.id = response.usuario.usuario_id
         if(this.tipo == 'administrador') {
           router.push({ name: 'Home.ADM' })
         }
@@ -86,60 +88,66 @@ export default defineComponent({
       this.tagSelecionada = nome;
       await this.getVideosByTag(nome);
     },
-      async getVideosByTag(tagName: string | null) {
-    try {
-      if (!tagName) {
 
-        const response = await VideoService.listarVideos()
-        const data = await response.data.map((item:any) => ({
-            id: item.video_id,
-            usuario_id: item.usuario_id,
+    async getVideosByTag(tagName: string | null) {
+      try {
+        if (!tagName) {
+
+          const response = await VideoService.listarVideos()
+          const data = await response.data.map((item:any) => ({
+              id: item.video_id,
+              usuario_id: item.usuario_id,
+              nome: item.nome,
+              imagem: item.imagem,
+              visualizacoes: item.visualizacoes,
+              nome_usuario: item.nome_usuario,
+            
+          }))
+          console.log(data);
+          
+          return data;
+        } else {
+          const response = await TagService.listarVideosPorTags(tagName);
+          this.videosByTag = response.data.map((item: any) => ({
+            id: item.id,
             nome: item.nome,
+            descricao: item.descricao,
+            link: item.link,
             imagem: item.imagem,
             visualizacoes: item.visualizacoes,
-            nome_usuario: item.nome_usuario,
-           
-        }))
-        console.log(data);
-        
-        return data;
-      } else {
-        const response = await TagService.listarVideosPorTags(tagName);
-        this.videosByTag = response.data.map((item: any) => ({
-          id: item.id,
-          nome: item.nome,
-          descricao: item.descricao,
-          link: item.link,
-          imagem: item.imagem,
-          visualizacoes: item.visualizacoes,
-          tags: item.tags,
-          nome_usuario: item.nome_usuario
-        }));
-        console.log('data: ',this.videosByTag);
+            tags: item.tags,
+            nome_usuario: item.nome_usuario
+          }));
+          console.log('data: ',this.videosByTag);
 
+        }
+      } catch (error) {
+        console.error('Erro ao buscar vídeos:', error);
       }
-    } catch (error) {
-      console.error('Erro ao buscar vídeos:', error);
-    }
-  },
+    },
 
-  async goToPageVideWithId(id:number) {
-    router.push({ name: 'Video.Visualizar', params: { id } })
-  },
-   async goToPerfilWithId(nome:string) {
-    try {
-      const response = await UserService.getUserByName(nome);
-      const id = response.usuario_id
-      console.log("id: ",id , " - ", response);
-      router.push({ name: 'Usuario.Perfil', params: { id } })
-      // window.location.reload()
+    async goToPageVideWithId(id:number) {
+      router.push({ name: 'Video.Visualizar', params: { id } })
+    },
+
+    async goToPerfilWithId(nome:string) {
+      try {
+        const response = await UserService.getUserByName(nome);
+        const id = response.usuario_id
+        if (id == this.id) {
+          router.push({ name: 'Usuario.Meu.Perfil'})
+
+        }else {
+          router.push({ name: 'Usuario.Perfil', params: { id } })
+        }
+        // window.location.reload()
+      }
+      catch (e) {
+        console.log('EEROR: ',e);
+        
+      }
+      //router.push({ name: 'Usuario.Perfil', params: { id } })
     }
-    catch (e) {
-      console.log('EEROR: ',e);
-      
-    }
-    //router.push({ name: 'Usuario.Perfil', params: { id } })
-  }
 
 
   },

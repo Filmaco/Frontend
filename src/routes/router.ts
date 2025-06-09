@@ -17,7 +17,7 @@ import EditarPlaylist from '@/views/playlist/EditarPlaylist.vue'
 import HomeADM from '@/views/HomeADM.vue'
 import { UserService } from '@/services/user.service'
 import MeuPerfil from '@/views/user/MeuPerfil.vue'
-
+import BuscaAvancada from '@/views/busca_avancada/BuscaAvancada.vue'
 
 
 const routes: Array<RouteRecordRaw> = [
@@ -109,10 +109,17 @@ const routes: Array<RouteRecordRaw> = [
         meta: {
         }
       },
-       {
+      {
         path: 'playlist/editar/:id',
         name: 'Playlist.Editar',
         component: EditarPlaylist,
+        meta: {
+        }
+      },
+      {
+        path: 'busca/avancada',
+        name: 'Busca',
+        component: BuscaAvancada,
         meta: {
         }
       },

@@ -31,9 +31,9 @@ const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
       data-sidebar="sidebar"
       data-mobile="true"
       :side="side"
-      class="w-[--sidebar-width] bg-[#D7BAFF] p-0 text-white [&>button]:hidden"
+      class="w-[--sidebar-width] bg-[#D7BAFF] p-0 text-white"
       :style="{
-        '--sidebar-width': '100px',
+        '--sidebar-width': '300px',
       }"
     >
       <div class="flex h-full w-full flex-col">

@@ -7,6 +7,9 @@ export default {
   ],
   theme: {
   	extend: {
+		screens: {
+        xs: '425px', // 👈 novo breakpoint para telas pequenas
+      },
   		borderRadius: {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',

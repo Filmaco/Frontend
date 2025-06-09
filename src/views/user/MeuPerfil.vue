@@ -77,6 +77,26 @@ interface Seguidores {
   username: string
 }
 
+interface SeguidoresEstatisticas {
+  usuario_id: number,
+  foto_perfil: string,
+  nome_completo: string,
+  username: string,
+  total_videos: number,
+  total_seguidores: number,
+  total_seguidos: number
+}
+
+interface SeguidosEstatisticas {
+  usuario_id: number,
+  foto_perfil: string,
+  nome_completo: string,
+  username: string,
+  total_videos: number,
+  total_seguidores: number,
+  total_seguidos: number
+}
+
   export default defineComponent({
     components:{
       Tabs,
@@ -146,14 +166,13 @@ interface Seguidores {
             total_seguidores: 0,
             total_seguidos: 0
         },
-
+        seguidores_com_estats: [] as SeguidoresEstatisticas[],
+        seguidos_com_estats: [] as SeguidosEstatisticas[],
       };
     },
     async mounted() { 
      
         try {
-            const id = parseInt(this.$route.params.id as string);
-            this.id = id;
             
            
             const item = await UserService.perfil();
@@ -182,6 +201,10 @@ interface Seguidores {
             
             this.ButtonEditar()
             this.playlists = await this.loadPlaylist(this.playlists)
+
+            this.seguidores_com_estats = await this.carregarSeguidoresComEstatisticas(this.seguidores_com_estats);
+
+            this.seguidos_com_estats = await this.carregarSeguidosComEstatisticas(this.seguidos_com_estats)
 
         } catch (e) {
             console.log('Erro ao buscar perfil:', e);
@@ -297,7 +320,65 @@ interface Seguidores {
         router.push({ name: 'Usuario.Perfil', params: { id } }).then(() => {
             location.reload();
             })
+      },
+
+      async listarEstatisticasSeguidores(id:any) {
+        try {
+          const response = await EstatisticaService.estatisticasPorUsuario(id)
+        }
+        catch(error) {
+          console.log(error)          
+        }
+      },
+
+      async carregarSeguidoresComEstatisticas(data: any) {
+        try {
+          const response = await EstatisticaService.seguidoresComEstatisticas(this.usuario.usuario_id)
+          data = response.seguidores.map((item: any) => ({
+            usuario_id: item.usuario_id,
+            nome_completo: item.nome_completo,
+            username: item.username,
+            foto_perfil: item.foto_perfil,
+            total_seguidores:  item.total_seguidores,
+            total_seguidos: item.total_seguidos,
+            total_videos: item.total_videos,
+          }));
+
+          // this.seguindo = data.some(seguidor => seguidor.usuario_id === this.id);
+
+          console.log('Está seguindo?', this.seguindo);
+          
+          return data;
+        } catch (error) {
+          console.error('Erro ao buscar seguidores com estatísticas:', error);
+          return [];
+        }
+      },
+
+       async carregarSeguidosComEstatisticas(data: any) {
+        try {
+          const response = await EstatisticaService.seguidosComEstatisticas(this.usuario.usuario_id)
+          data = response.seguidos.map((item: any) => ({
+            usuario_id: item.usuario_id,
+            nome_completo: item.nome_completo,
+            username: item.username,
+            foto_perfil: item.foto_perfil,
+            total_seguidores:  item.total_seguidores,
+            total_seguidos: item.total_seguidos,
+            total_videos: item.total_videos,
+          }));
+
+          // this.seguindo = data.some(seguidor => seguidor.usuario_id === this.id);
+
+          console.log('Está seguindo?', this.seguindo);
+          
+          return data;
+        } catch (error) {
+          console.error('Erro ao buscar seguidores com estatísticas:', error);
+          return [];
+        }
       }
+
 
     }
   });
@@ -308,7 +389,7 @@ interface Seguidores {
     <div class="bg-green-500 h-[200px]"></div>
     <div class="flex w-full items-center justify-center flex-col">
 
-         <div class=" w-[175px] h-[180px] mt-[-7%] bg-white p-[3px] rounded-full mb-10">
+         <div class=" w-[175px] h-[180px] lg:mt-[-7%] sm:mt-[-7%] bg-white p-[3px] rounded-full mb-10 xs:mt-[-20%]">
             <img
               :src="`http://localhost:8000/uploads/${usuario.foto_perfil}`"
               alt="Foto de perfil"
@@ -326,8 +407,8 @@ interface Seguidores {
           </div>
         </div>
 
-        <div>
-          <div class="flex grid grid-cols-5 gap-2 items-center justify-center">
+        <div class="flex justify-center items-center">
+          <div class="flex grid grid-cols-5 gap-2 items-center justify-center lg:w-full md:w-full xs:w-[80%] ">
             <div class="flex flex-col items-center">
                 <p class="text-3xl mb-3" v-if="estatisticas.total_videos">{{ estatisticas.total_videos }}</p>
                 <p class="text-3xl mb-3" v-else>0</p>
@@ -382,9 +463,9 @@ interface Seguidores {
             <Separator orientation="vertical" class="ml-10"/>
 
              <div class="flex flex-col items-center">
-              <p class="text-3xl mb-3" v-if="estatisticas.total_seguidos">{{ estatisticas.total_seguidos }}</p>
-                    <p class="text-3xl mb-3" v-else>0</p>
-                    <p class="text-gray-600">Seguindo</p>
+                <p class="text-3xl mb-3" v-if="estatisticas.total_seguidos">{{ estatisticas.total_seguidos }}</p>
+                <p class="text-3xl mb-3" v-else>0</p>
+                <p class="text-gray-600">Seguindo</p>
             </div>
           </div>
         </div>
@@ -484,8 +565,8 @@ interface Seguidores {
         <TabsContent value="seguidores" class="w-full">
           <div class="w-full" >
 
-            <Tabs default-value="seguidores" class="w-full mt-4">
-              <TabsList class="grid w-full grid-cols-1 border-none bg-transparent w-[100px]">
+            <Tabs default-value="seguindo" class="w-full mt-4">
+              <TabsList class="grid md:w-[200px] xs:w-[200px]  grid-cols-1 md:grid-cols-2 gap-2 border-none bg-transparent xs:grid-cols-2">
                 <TabsTrigger value="seguidores" class="">
                   Seguidores
                 </TabsTrigger>
@@ -493,76 +574,97 @@ interface Seguidores {
                   Seguindo
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="seguidores" class="w-full ml-[100px] ">
+              <TabsContent value="seguidores" class="w-full lg:ml-[100px] sm:ml-[100px] md:ml-[100px] lg:mt-[-80px] sm:mt-[-80px] md:mt-[0px] sm:mt-1">
                 <div class="w-full  " >
 
                   <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
-                      <div
-                        v-for="video in videos"
-                        :key="video.id"
-                        class="bg-white" 
-                        style="cursor: pointer;"
-                        @click="goToPageVideWithId(video.id)"
+                     <div
+                        v-for="seguidor in seguidores_com_estats"
+                        :key="seguidor.usuario_id"
+                        class="bg-white"
                       >
-                        <div>
-                        
-                          <img
-                            v-if="video.imagem"
-                            :src="`http://localhost:8000/uploads/${video.imagem}`"
-                            alt="Thumbnail"
-                            class="mt-2 h-[190px] w-[443px] object-cover rounded-xl"
-                          />
-                        </div>
-                        <div class="flex mt-3 gap-4 items-center">
-                          <Avatar>
-                            <AvatarImage :src="`http://localhost:8000/uploads/${usuario.foto_perfil}`"/>
-                            <AvatarFallback>CN</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <h3 class="font-bold text-base">{{ video.nome }}</h3>
-                            <p class="text-xs">{{ video.visualizacoes }} visualizações</p>
-                          </div>
-                        </div>
+                        <Card @click="goToPerfil(seguidor.usuario_id)" style="cursor: pointer;">
+                          <CardContent class="flex justify-center items-center mb-5 pt-7 flex-col">
+                            <img
+                              v-if="seguidor.foto_perfil"
+                              :src="`http://localhost:8000/uploads/${seguidor.foto_perfil}`"
+                              alt="Foto"
+                              class="h-[100px] w-[100px] object-cover rounded-full"
+                            />
+                            <p class="font-bold mt-2">{{ seguidor.username }}</p>
+                            <p class="text-sm">{{ seguidor.nome_completo }}</p>
+                            <div class=" mt-2 grid grid-cols-3 bg-[#f6f6f6] py-1 gap-2">
 
+                              <div class="flex flex-col justify-center items-center">
+                                <p class="text-base">{{ seguidor.total_videos }}</p>
+                                <p class="text-xs text-gray-500">Vídeos</p>
+                              </div>
+
+                               <div class="flex flex-col justify-center items-center">
+                                <p class="text-base">{{ seguidor.total_seguidores }}</p>
+                                <p class="text-xs text-gray-500">Seguidores</p>
+                              </div>
+
+                               <div class="flex flex-col justify-center items-center">
+                                <p class="text-base">{{ seguidor.total_seguidos }}</p>
+                                <p class="text-xs text-gray-500">Seguindo</p>
+                              </div>
+                              
+                            </div>
+                          </CardContent>
+                        </Card>
                       </div>
                     </div>
                   
                 </div>
                 
               </TabsContent>
-              <TabsContent value="seguindo" class="w-full">
-                <div class="w-full" >
+             <TabsContent value="seguindo" class="w-full lg:ml-[100px] sm:ml-[100px] md:ml-[100px] lg:mt-[-80px] sm:mt-[-80px] md:mt-[0px] sm:mt-1">
+                <div class="w-full  " >
 
-                  <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
-                      <div
-                        v-for="playlist in playlists"
-                        :key="playlist.playlist_id"
-                        class="bg-white" 
-                        style="cursor: pointer;"
-                        @click="goToPagePlaylistWithId(playlist.playlist_id)"
+                 <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
+                     <div
+                        v-for="seguido in seguidos_com_estats"
+                        :key="seguido.usuario_id"
+                        class="bg-white"
                       >
-                      <div v-if="playlist.status == 'ativo'">
+                        <Card @click="goToPerfil(seguido.usuario_id)" style="cursor: pointer;">
+                          <CardContent class="flex justify-center items-center mb-5 pt-7 flex-col">
+                            <img
+                              v-if="seguido.foto_perfil"
+                              :src="`http://localhost:8000/uploads/${seguido.foto_perfil}`"
+                              alt="Foto"
+                              class="h-[100px] w-[100px] object-cover rounded-full"
+                            />
+                            <p class="font-bold mt-2">{{ seguido.username }}</p>
+                            <p class="text-sm">{{ seguido.nome_completo }}</p>
+                            <div class=" mt-2 grid grid-cols-3 bg-[#f6f6f6] py-1 gap-2">
 
-                        <div>
-                          <img
-                            v-if="playlist.imagem"
-                            :src="`http://localhost:8000/uploads/${playlist.imagem}`"
-                            alt="Thumbnail"
-                            class="mt-2 h-[190px] w-[443px] object-cover rounded-xl"
-                          />
-                        </div>
-                        <div class="flex mt-3 gap-4 items-center">
-                          <div>
-                            <h3 class="font-bold text-base">{{ playlist.titulo }}</h3>
-                            <!-- <p class="text-xs">{{ playlist.visualizacoes }} visualizações</p> -->
-                          </div>
-                        </div>
+                              <div class="flex flex-col justify-center items-center">
+                                <p class="text-base">{{ seguido.total_videos }}</p>
+                                <p class="text-xs text-gray-500">Vídeos</p>
+                              </div>
+
+                               <div class="flex flex-col justify-center items-center">
+                                <p class="text-base">{{ seguido.total_seguidores }}</p>
+                                <p class="text-xs text-gray-500">Seguidores</p>
+                              </div>
+
+                               <div class="flex flex-col justify-center items-center">
+                                <p class="text-base">{{ seguido.total_seguidos }}</p>
+                                <p class="text-xs text-gray-500">Seguindo</p>
+                              </div>
+                              
+                            </div>
+                          </CardContent>
+                        </Card>
                       </div>
 
-                      </div>
+
                     </div>
                   
                 </div>
+                
               </TabsContent>
             </Tabs>
             

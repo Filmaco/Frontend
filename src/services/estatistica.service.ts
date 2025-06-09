@@ -12,6 +12,23 @@ const EstatisticaService = new class {
         });
     }
 
+    public seguidoresComEstatisticas(usuarioId: number) {
+        return new Promise<any>((resolve, reject) => {
+            axios.get(`${API_URL}/seguidores/${usuarioId}`)
+                .then(response => resolve(response.data))
+                .catch((error: AxiosError) => reject(error));
+        });
+    }
+
+    public seguidosComEstatisticas(usuarioId: number) {
+    return new Promise<any>((resolve, reject) => {
+        axios.get(`${API_URL}/seguidos/${usuarioId}`)
+            .then(response => resolve(response.data))
+            .catch((error: AxiosError) => reject(error));
+    });
+}
+
+
 }
 
 export default EstatisticaService

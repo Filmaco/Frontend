@@ -206,8 +206,17 @@ export default defineComponent({
         avaliacao: ''
       },
       edit_avaliacao: {
-        avaliacao_id: null as (number | null),
-        avaliacao: ''
+        avaliacao_id: null as number | null,
+        avaliacao: '' as string,
+      },
+      avaliacao_usuario: {
+        avaliacao: '' as string,
+        avaliacao_id: ''
+      },
+      total_avaliacoes: {
+        total_love: '',
+        total_like: '',
+        total_dislike: '',
       }
     };
   },
@@ -227,6 +236,8 @@ export default defineComponent({
       
       this.playlist_list = await this.listarPlaylist(this.playlist_list )
       this.usuario_atual = user.usuario;
+      this.listarUltimaAvaliacaoPorUsuario(this.data.usuario_id)
+
     })
     .catch((e) => {
         console.log(e);
@@ -239,6 +250,10 @@ export default defineComponent({
     console.log( this.is_dialog_open);
     
     AvaliacaoService.listarAvaliacaoPorVideo(this.id)
+    // alert(`${this.avaliacao_usuario.avaliacao_id}`)
+
+    this.listarAvaliacoes()
+    
     
   },
 
@@ -481,53 +496,74 @@ export default defineComponent({
       }
     },
 
-   toggleIcon(type) {
-    const tipoParaNumero = {
-      dislike: 1,
-      like: 2,
-      love: 3,
-    };
+    async toggleIcon(type) {
+      const tipoParaNumero = {
+        dislike: 1,
+        like: 2,
+        love: 3,
+      };
 
-    const valorNumerico = tipoParaNumero[type];
+      const numeroParaContador = {
+        1: "total_dislike",
+        2: "total_like",
+        3: "total_love",
+      };
 
-    if (this.activeIcon === type && this.edit_avaliacao.avaliacao_id) {
-      this.activeIcon = null;
-      this.deletarAvaliacao(); 
-      return;
-    }
+      const valorNumerico = tipoParaNumero[type];
+      const avaliacaoAnterior = Number(this.avaliacao_usuario.avaliacao);
 
-    this.activeIcon = type;
+      if (valorNumerico === avaliacaoAnterior) {
+        return;
+      } else {
+        if (this.avaliacao_usuario.avaliacao) {
+          await this.editarAvaliacao(this.avaliacao_usuario.avaliacao_id, valorNumerico);
+          this.total_avaliacoes[numeroParaContador[avaliacaoAnterior]]--;
+          this.total_avaliacoes[numeroParaContador[valorNumerico]]++;
+          this.avaliacao_usuario.avaliacao = valorNumerico.toString(); 
+        } else {
+          const response = await this.addAvaliacao(valorNumerico);
+          this.total_avaliacoes[numeroParaContador[valorNumerico]]++;
+          this.avaliacao_usuario = {
+            avaliacao_id: response.id,
+            avaliacao: valorNumerico.toString(),
+          };
+        }
 
-    if (this.edit_avaliacao.avaliacao_id) {
-      this.editarAvaliacao(valorNumerico);
-    } else {
-      this.addAvaliacao(valorNumerico);
-    }
-  },
+        this.activeIcon = type;
+      }
+    },
+
+
 
     async addAvaliacao(valor) {
       const formData = new FormData();
       formData.append('usuario_id', String(this.data.usuario_id));
       formData.append('video_id', String(this.id));
-      formData.append('avaliacao', valor); 
-      try {
-        const response = await AvaliacaoService.criarAvaliacao(formData);
-        console.log(response);
-        
-        this.edit_avaliacao.avaliacao_id = response.id; 
-        alert("Avaliação adicionada");
-      } catch (error) {
-        console.error(error);
-        alert("Erro ao adicionar avaliação");
-      }
-    },
-
-    async editarAvaliacao(valor) {
-      const formData = new FormData();
       formData.append('avaliacao', valor);
 
       try {
-        await AvaliacaoService.editarAvaliacao(this.edit_avaliacao.avaliacao_id, formData);
+        const response = await AvaliacaoService.criarAvaliacao(formData);
+
+        const mapNumeroParaTipo = {
+          1: "dislike",
+          2: "like",
+          3: "love",
+        };
+        this.activeIcon = mapNumeroParaTipo[valor];
+
+        alert("Avaliação adicionada");
+        return response; // ← retorno agora é necessário
+      } catch (error) {
+        console.error(error);
+        alert("Erro ao adicionar avaliação");
+        throw error;
+      }
+    },
+
+    async editarAvaliacao(id, valor) {
+
+      try {
+        await AvaliacaoService.editarAvaliacao(id, valor);
         alert("Avaliação atualizada");
       } catch (error) {
         console.error(error);
@@ -535,18 +571,54 @@ export default defineComponent({
       }
     },
 
-    async deletarAvaliacao() {
+    // async deletarAvaliacao(valor) {
+    //   try {
+    //     await AvaliacaoService.deletarAvaliacao(valor);
+        
+    //     this.edit_avaliacao.avaliacao_id = null;
+    //     this.edit_avaliacao.avaliacao = '';
+    //     this.avaliacao_usuario = { avaliacao: '' , avaliacao_id: ''};
+    //     this.activeIcon = null;
+        
+
+    //     alert("Avaliação removida");
+    //   } catch (error) {
+    //     console.error(error);
+    //     alert("Erro ao remover avaliação");
+    //   }
+    // },
+
+    async listarUltimaAvaliacaoPorUsuario(user:any) {
       try {
-        await AvaliacaoService.deletarAvaliacao(this.edit_avaliacao.avaliacao_id);
-        this.edit_avaliacao.avaliacao_id = null;
-        alert("Avaliação removida");
-      } catch (error) {
-        console.error(error);
-        alert("Erro ao remover avaliação");
+        const response = await AvaliacaoService.ultimaAvaliacaoDoUsuario(user, this.id)
+        this.avaliacao_usuario = response.dados;
+        const numeroParaTipo = {
+          1: "dislike",
+          2: "like",
+          3: "love",
+        };
+
+        if (this.avaliacao_usuario && this.avaliacao_usuario.avaliacao) {
+          this.activeIcon = numeroParaTipo[Number(this.avaliacao_usuario.avaliacao)];
+          // alert(`${this.avaliacao_usuario} && ${this.avaliacao_usuario.avaliacao}`)
+          
+          
+        }
+      }catch(error) {
+        console.log(error);
+        // alert('OPA, DEU MERDA')
+        
       }
+    },
+
+    async listarAvaliacoes() {
+        const avaliacoes_total = await AvaliacaoService.listarUltimasAvaliacoesPorVideo(this.id)
+        console.log(avaliacoes_total);
+    
+        this.total_avaliacoes.total_dislike = avaliacoes_total.dados.total_dislike;
+        this.total_avaliacoes.total_like = avaliacoes_total.dados.total_like;
+        this.total_avaliacoes.total_love = avaliacoes_total.dados.total_love
     }
-    
-    
   }
 });
 </script>
@@ -716,15 +788,18 @@ export default defineComponent({
       <div class="flex grid grid-cols-3 gap-4 items-center justify-center ">
         <div class="flex flex-col items-center" @click="toggleIcon('love')" style="cursor: pointer;">
           <Heart :class="activeIcon === 'love' ? 'fill-black' : 'fill-none'" />
-          <p>10</p>
+           <p class="" v-if="total_avaliacoes.total_love">{{ total_avaliacoes.total_love }}</p>
+                <p class="" v-else>0</p>
         </div>
         <div class="flex flex-col items-center" @click="toggleIcon('like')" style="cursor: pointer;">
           <ThumbsUp :class="activeIcon === 'like' ? 'fill-black ' : 'fill-none'" />
-          <p>10</p>
+           <p class="" v-if="total_avaliacoes.total_like">{{ total_avaliacoes.total_like }}</p>
+                <p class="" v-else>0</p>
         </div>
         <div class="flex flex-col items-center" @click="toggleIcon('dislike')" style="cursor: pointer;">
           <ThumbsDown :class="activeIcon === 'dislike' ? 'fill-black ' : 'fill-none'" />
-          <p>10</p>
+           <p class="" v-if="total_avaliacoes.total_dislike">{{ total_avaliacoes.total_dislike }}</p>
+                <p class="" v-else>0</p>
         </div>
       </div>
       </div>
