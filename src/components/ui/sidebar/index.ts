@@ -36,11 +36,11 @@ export { default as SidebarTrigger } from './SidebarTrigger.vue'
 export { useSidebar } from './utils'
 
 export const sidebarMenuButtonVariants = cva(
-  'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding] hover:bg-[#513188] hover:text-swhite focus-visible:ring-2 active:bg-[#513188] active:text-white disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-[#513188] data-[active=true]:font-medium data-[active=true]:text-white data-[state=open]:hover:bg-[#513188] data-[state=open]:hover:text-white group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 mb-auto ',
+  'peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm outline-none ring-sidebar-ring transition-[width,height,padding]  hover:text-swhite focus-visible:ring-2 active:bg-[#513188] active:text-white disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-[#513188] data-[active=true]:font-medium data-[active=true]:text-white data-[state=open]:hover:bg-[#513188] data-[state=open]:hover:text-white group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 mb-auto ',
   {
     variants: {
       variant: {
-        default: 'hover:bg-[#513188] hover:text-white',
+        default: 'hover:bg-transparent hover:text-white',
         outline:
           'bg-[#513188] shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-[#513188] hover:text-white hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
       },

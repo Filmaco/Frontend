@@ -18,7 +18,8 @@ import HomeADM from '@/views/HomeADM.vue'
 import { UserService } from '@/services/user.service'
 import MeuPerfil from '@/views/user/MeuPerfil.vue'
 import BuscaAvancada from '@/views/busca_avancada/BuscaAvancada.vue'
-
+import ListaDenuncias from '@/views/admin/ListaDenuncias.vue'
+import ListaMinhasPlaylist from '@/views/playlist/ListaMinhasPlaylist.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -46,6 +47,15 @@ const routes: Array<RouteRecordRaw> = [
         path: 'usuarios',
         name: 'Usuarios',
         component: ListaUsuario,
+        meta: {
+          requiresAdmin: true,
+          
+        }
+      },
+      {
+        path: 'denuncias',
+        name: 'Denuncias',
+        component: ListaDenuncias,
         meta: {
           requiresAdmin: true,
           
@@ -99,6 +109,13 @@ const routes: Array<RouteRecordRaw> = [
         path: 'playlists',
         name: 'Playlist',
         component: ListaPlaylists,
+        meta: {
+        }
+      },
+      {
+        path: 'minhas/playlists',
+        name: 'Playlist.User',
+        component: ListaMinhasPlaylist,
         meta: {
         }
       },

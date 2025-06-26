@@ -1,9 +1,8 @@
 'use strict';
 
 const vue = require('vue');
-const DismissableLayer_DismissableLayer = require('../DismissableLayer/DismissableLayer.cjs');
-const Menu_utils = require('../Menu/utils.cjs');
 const core = require('@vueuse/core');
+const Menu_utils = require('../Menu/utils.cjs');
 const Select_SelectItemAlignedPosition = require('./SelectItemAlignedPosition.cjs');
 const Select_SelectPopperPosition = require('./SelectPopperPosition.cjs');
 const Collection_Collection = require('../Collection/Collection.cjs');
@@ -15,6 +14,7 @@ const shared_useHideOthers = require('../shared/useHideOthers.cjs');
 const shared_useTypeahead = require('../shared/useTypeahead.cjs');
 const shared_useForwardProps = require('../shared/useForwardProps.cjs');
 const FocusScope_FocusScope = require('../FocusScope/FocusScope.cjs');
+const DismissableLayer_DismissableLayer = require('../DismissableLayer/DismissableLayer.cjs');
 const Select_SelectRoot = require('./SelectRoot.cjs');
 
 const SelectContentDefaultContextValue = {

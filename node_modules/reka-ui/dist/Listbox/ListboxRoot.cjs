@@ -1,8 +1,8 @@
 'use strict';
 
 const vue = require('vue');
-const Collection_Collection = require('../Collection/Collection.cjs');
 const core = require('@vueuse/core');
+const Collection_Collection = require('../Collection/Collection.cjs');
 const Listbox_utils = require('./utils.cjs');
 const RovingFocus_utils = require('../RovingFocus/utils.cjs');
 require('@floating-ui/vue');

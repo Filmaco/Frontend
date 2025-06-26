@@ -1,5 +1,5 @@
 import { isClient } from '@vueuse/shared';
-import { ref, watchEffect, nextTick } from 'vue';
+import { ref, watchEffect, toValue, nextTick } from 'vue';
 import { h as handleAndDispatchCustomEvent } from '../shared/handleAndDispatchCustomEvent.js';
 
 const POINTER_DOWN_OUTSIDE = "dismissableLayer.pointerDownOutside";
@@ -20,13 +20,13 @@ function isLayerExist(layerElement, targetElement) {
     return false;
   }
 }
-function usePointerDownOutside(onPointerDownOutside, element) {
+function usePointerDownOutside(onPointerDownOutside, element, enabled = true) {
   const ownerDocument = element?.value?.ownerDocument ?? globalThis?.document;
   const isPointerInsideDOMTree = ref(false);
   const handleClickRef = ref(() => {
   });
   watchEffect((cleanupFn) => {
-    if (!isClient)
+    if (!isClient || !toValue(enabled))
       return;
     const handlePointerDown = async (event) => {
       const target = event.target;
@@ -69,14 +69,18 @@ function usePointerDownOutside(onPointerDownOutside, element) {
     });
   });
   return {
-    onPointerDownCapture: () => isPointerInsideDOMTree.value = true
+    onPointerDownCapture: () => {
+      if (!toValue(enabled))
+        return;
+      isPointerInsideDOMTree.value = true;
+    }
   };
 }
-function useFocusOutside(onFocusOutside, element) {
+function useFocusOutside(onFocusOutside, element, enabled = true) {
   const ownerDocument = element?.value?.ownerDocument ?? globalThis?.document;
   const isFocusInsideDOMTree = ref(false);
   watchEffect((cleanupFn) => {
-    if (!isClient)
+    if (!isClient || !toValue(enabled))
       return;
     const handleFocus = async (event) => {
       if (!element?.value)
@@ -99,8 +103,16 @@ function useFocusOutside(onFocusOutside, element) {
     cleanupFn(() => ownerDocument.removeEventListener("focusin", handleFocus));
   });
   return {
-    onFocusCapture: () => isFocusInsideDOMTree.value = true,
-    onBlurCapture: () => isFocusInsideDOMTree.value = false
+    onFocusCapture: () => {
+      if (!toValue(enabled))
+        return;
+      isFocusInsideDOMTree.value = true;
+    },
+    onBlurCapture: () => {
+      if (!toValue(enabled))
+        return;
+      isFocusInsideDOMTree.value = false;
+    }
   };
 }
 

@@ -22,13 +22,13 @@ function isLayerExist(layerElement, targetElement) {
     return false;
   }
 }
-function usePointerDownOutside(onPointerDownOutside, element) {
+function usePointerDownOutside(onPointerDownOutside, element, enabled = true) {
   const ownerDocument = element?.value?.ownerDocument ?? globalThis?.document;
   const isPointerInsideDOMTree = vue.ref(false);
   const handleClickRef = vue.ref(() => {
   });
   vue.watchEffect((cleanupFn) => {
-    if (!shared.isClient)
+    if (!shared.isClient || !vue.toValue(enabled))
       return;
     const handlePointerDown = async (event) => {
       const target = event.target;
@@ -71,14 +71,18 @@ function usePointerDownOutside(onPointerDownOutside, element) {
     });
   });
   return {
-    onPointerDownCapture: () => isPointerInsideDOMTree.value = true
+    onPointerDownCapture: () => {
+      if (!vue.toValue(enabled))
+        return;
+      isPointerInsideDOMTree.value = true;
+    }
   };
 }
-function useFocusOutside(onFocusOutside, element) {
+function useFocusOutside(onFocusOutside, element, enabled = true) {
   const ownerDocument = element?.value?.ownerDocument ?? globalThis?.document;
   const isFocusInsideDOMTree = vue.ref(false);
   vue.watchEffect((cleanupFn) => {
-    if (!shared.isClient)
+    if (!shared.isClient || !vue.toValue(enabled))
       return;
     const handleFocus = async (event) => {
       if (!element?.value)
@@ -101,8 +105,16 @@ function useFocusOutside(onFocusOutside, element) {
     cleanupFn(() => ownerDocument.removeEventListener("focusin", handleFocus));
   });
   return {
-    onFocusCapture: () => isFocusInsideDOMTree.value = true,
-    onBlurCapture: () => isFocusInsideDOMTree.value = false
+    onFocusCapture: () => {
+      if (!vue.toValue(enabled))
+        return;
+      isFocusInsideDOMTree.value = true;
+    },
+    onBlurCapture: () => {
+      if (!vue.toValue(enabled))
+        return;
+      isFocusInsideDOMTree.value = false;
+    }
   };
 }
 

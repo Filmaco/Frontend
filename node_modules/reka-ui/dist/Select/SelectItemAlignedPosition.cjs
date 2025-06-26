@@ -2,8 +2,8 @@
 
 const vue = require('vue');
 const Select_utils = require('./utils.cjs');
-const Collection_Collection = require('../Collection/Collection.cjs');
 const core = require('@vueuse/core');
+const Collection_Collection = require('../Collection/Collection.cjs');
 const Select_SelectRoot = require('./SelectRoot.cjs');
 const Select_SelectContentImpl = require('./SelectContentImpl.cjs');
 const shared_useForwardExpose = require('../shared/useForwardExpose.cjs');

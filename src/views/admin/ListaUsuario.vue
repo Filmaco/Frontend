@@ -4,7 +4,7 @@ import { defineComponent } from 'vue';
 import { ref, onMounted } from 'vue'
 import UsuarioTable from '@/components/datatable/UsuarioTable.vue';
 import { Data } from '@/components/datatable/data'
-import columns from '@/components/datatable/usuarioTable';
+import columns from '@/components/datatable/usuario.table';
 import DataTable from '@/components/datatable/DataTable.vue';
 import { UserService } from '@/services/user.service';
 import { reload } from '@firebase/auth';
@@ -129,13 +129,13 @@ export default defineComponent({
 <template>
     <main class="pb-16 pt-20 px-5 full w-full h-full flex justify-center content-center">
       <DataTable 
-      :data="data" 
-      :columns="columns"
-      :user-id="id"
-      @inativar-por-id="inativar" 
-      @tornar-adm="tornarUsuarioADM"
-      @tornar-comum="tornarUsuarioComum" 
-      @ativar-por-id="ativar"/>
+        :data="data" 
+        :columns="columns"
+        :user-id="id"
+        @inativar-por-id="inativar" 
+        @tornar-adm="tornarUsuarioADM"
+        @tornar-comum="tornarUsuarioComum" 
+        @ativar-por-id="ativar"/>
     </main>
   </template>
   

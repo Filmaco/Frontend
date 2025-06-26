@@ -1,8 +1,8 @@
 'use strict';
 
 const vue = require('vue');
-const Popper_PopperRoot = require('../Popper/PopperRoot.cjs');
 const core = require('@vueuse/core');
+const Popper_PopperRoot = require('../Popper/PopperRoot.cjs');
 const shared_useIsUsingKeyboard = require('../shared/useIsUsingKeyboard.cjs');
 const shared_createContext = require('../shared/createContext.cjs');
 const shared_useDirection = require('../shared/useDirection.cjs');

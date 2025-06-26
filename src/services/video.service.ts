@@ -55,12 +55,24 @@ const VideoService = new class{
     //         })  
     // }
 
-     public inativarVideo(id:number) {
+    public inativarVideo(id:number) {
         return new Promise<any>((resolve, reject) => {         
-            axios.put(`${API_URL}/status/${id}`)
+            axios.put(`${API_URL}/status/${id}/inativo`)
                 .then(response => {
                     resolve(response.data)
-                     window.location.reload()
+                        window.location.reload()
+                })
+                .catch((error: AxiosError) => reject(error))
+                
+            })  
+    }
+
+    public ativarVideo(id:number) {
+        return new Promise<any>((resolve, reject) => {         
+            axios.put(`${API_URL}/status/${id}/ativo`)
+                .then(response => {
+                    resolve(response.data)
+                        window.location.reload()
                 })
                 .catch((error: AxiosError) => reject(error))
                 
@@ -83,7 +95,7 @@ const VideoService = new class{
     public buscarPorId(id: string) {
         return new Promise<any>((resolve, reject) => {
             axios.get(`${API_URL}/${id}`)
-                .then((response) => resolve(response.data))
+                .then((response) => resolve(response))
                 .catch((error: AxiosError) => reject(error));
         });
     }

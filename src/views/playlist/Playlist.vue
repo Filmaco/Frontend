@@ -136,7 +136,7 @@ interface Video {
     },
     data() {
       return {
-        userIdPerfil: 0,
+        userIdPerfil: '',
         genero: {
           
         },
@@ -169,6 +169,16 @@ interface Video {
         this.loadPlaylist(this.id);
         this.videos = await this.getVideosByPlaylistId(this.videos)
 
+      try {
+        const response = await UserService.perfil()
+        this.userIdPerfil = response.usuario.usuario_id
+        console.log(this.userIdPerfil)
+        
+      }catch(error) {
+          console.log(error)
+      }
+        
+  
         
     },
     methods: {
@@ -291,7 +301,7 @@ interface Video {
                       <p class="py-3 text-xl">{{ playlist.titulo }}</p>
                       <p class="text-[10px]"> 0 Videos</p>
                     </div>
-                     <DropdownMenu>
+                     <DropdownMenu v-if="userIdPerfil == playlist.usuario_id">
                        <DropdownMenuTrigger as-child class="flex items-center justify-center ">
                         <div class="rounded-full border flex items-center inline h-[30px] w-[30px] justify-center" style="cursor: pointer;">
                            <EllipsisVertical class=""/>
@@ -306,7 +316,7 @@ interface Video {
                            <DropdownMenuItem>
                              <div @click="inativarPlaylist" class="p-2 mx-1 flex" style="cursor: pointer;">
                                 <CircleX/>
-                                <p>Inativar PLaylist</p>
+                                <p>Inativar Playlist</p>
                               </div>
                            </DropdownMenuItem>
                             <DropdownMenuItem as-child>
@@ -412,7 +422,7 @@ interface Video {
                 </div>
               </div>
               <div class="py-2 flex">
-                    <DropdownMenu>
+                    <DropdownMenu  v-if="userIdPerfil == playlist.usuario_id">
                        <DropdownMenuTrigger as-child class="flex items-center justify-center ">
                         <div class="rounded-full border flex items-center inline h-[30px] w-[30px] justify-center" style="cursor: pointer;">
                            <EllipsisVertical class=""/>

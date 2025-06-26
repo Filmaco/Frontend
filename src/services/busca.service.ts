@@ -6,9 +6,9 @@ const BuscaAvancadaService = new class {
 
     public buscarVideosAvancado(filtros: {
         nome?: string;
-        genero?: string;
+        generos?: string[];
+        tipos?: string[];
         tags?: string[];
-        tipo?: string;
         data_inicio?: string;
         data_fim?: string;
         duracao?: string;
@@ -17,11 +17,18 @@ const BuscaAvancadaService = new class {
             const params = new URLSearchParams();
 
             if (filtros.nome) params.append("nome", filtros.nome);
-            if (filtros.genero) params.append("genero", filtros.genero);
-            if (filtros.tipo) params.append("tipo", filtros.tipo);
             if (filtros.data_inicio) params.append("data_inicio", filtros.data_inicio);
             if (filtros.data_fim) params.append("data_fim", filtros.data_fim);
             if (filtros.duracao) params.append("duracao", filtros.duracao);
+
+            if (filtros.generos && filtros.generos.length > 0) {
+                filtros.generos.forEach(g => params.append("generos", g));
+            }
+
+            if (filtros.tipos && filtros.tipos.length > 0) {
+                filtros.tipos.forEach(t => params.append("tipos", t));
+            }
+
             if (filtros.tags && filtros.tags.length > 0) {
                 filtros.tags.forEach(tag => params.append("tags", tag));
             }
@@ -31,6 +38,7 @@ const BuscaAvancadaService = new class {
                 .catch((error: AxiosError) => reject(error));
         });
     }
+
 
 };
 

@@ -634,7 +634,7 @@ interface SeguidosEstatisticas {
           <div class="w-full" >
 
             <Tabs default-value="seguidores" class="w-full mt-4">
-              <TabsList class="grid w-full grid-cols-2 md:grid-cols-1 gap-2 border-none bg-transparent xs:grid-cols-2">
+              <TabsList class="grid w-[30%] grid-cols-2  gap-2 border-none bg-transparent ">
                 <TabsTrigger value="seguidores" class="">
                   Seguidores
                 </TabsTrigger>
@@ -642,10 +642,10 @@ interface SeguidosEstatisticas {
                   Seguindo
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="seguidores" class="w-full lg:ml-[100px] sm:ml-[100px] md:ml-[100px] lg:mt-[-80px] sm:mt-[-80px] md:mt-[-80px] sm:mt-1">
+              <TabsContent value="seguidores" class="w-full ">
                 <div class="w-full  " >
 
-                  <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10 sm:bg-red-300">
+                  <div  class="grid grid-cols-4 gap-3 mt-4">
                      <div
                         v-for="seguidor in seguidores_com_estats"
                         :key="seguidor.usuario_id"
@@ -687,10 +687,10 @@ interface SeguidosEstatisticas {
                 </div>
                 
               </TabsContent>
-             <TabsContent value="seguindo" class="w-full lg:ml-[100px] sm:ml-[100px] md:ml-[100px] lg:mt-[-80px] sm:mt-[-80px] md:mt-[-80px] sm:mt-1">
+             <TabsContent value="seguindo" class="w-full mt-4">
                 <div class="w-full  " >
 
-                 <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
+                 <div  class="grid grid-cols-4 gap-3 mt-6 mx-10">
                      <div
                         v-for="seguido in seguidos_com_estats"
                         :key="seguido.usuario_id"

@@ -155,17 +155,15 @@ export default defineComponent({
 });
 </script>
 
-
-
 <template>
   <div>
     <Carousel
-      class="relative w-[160vh] max-w-[160vh] ml-10"
+      class="relative w-[100vw] max-w-[160vh] ml-20"
       :opts="{
         align: 'start',
       }"
     >
-      <CarouselContent class=" gap-2">
+      <CarouselContent class="gap-2">
         <CarouselItem class="flex-none p-0 m-0 flex justify-center pl-3">
           <div class="p-1">
             <Card 
@@ -210,8 +208,6 @@ export default defineComponent({
       <CarouselNext />
     </Carousel>
 
-    <p v-if="tagSelecionada">Tag selecionada: {{ tagSelecionada }}</p>
-
     <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
       <div
         v-for="video in videosByTag"
@@ -220,7 +216,7 @@ export default defineComponent({
         style="cursor: pointer;"
        
       >
-        <div  @click="goToPageVideWithId(video.id)">
+        <div @click="goToPageVideWithId(video.id)">
           <img
             v-if="video.imagem"
             :src="`http://localhost:8000/uploads/${video.imagem}`"

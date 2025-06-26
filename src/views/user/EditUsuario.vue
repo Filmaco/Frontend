@@ -240,7 +240,7 @@ import { Eye, EyeClosed } from 'lucide-vue-next'
               @change="handleFileChange"
             />
           </label>
-        </div>
+         </div>
 
           <p class="text-xl">{{ usuario.nome_completo }}</p>
 

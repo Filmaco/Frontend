@@ -1,12 +1,12 @@
 'use strict';
 
 const vue = require('vue');
-const Collection_Collection = require('../Collection/Collection.cjs');
-const RovingFocus_utils = require('../RovingFocus/utils.cjs');
-const shared_useTypeahead = require('../shared/useTypeahead.cjs');
 const vueVirtual = require('@tanstack/vue-virtual');
 const core = require('@vueuse/core');
 const shared = require('@vueuse/shared');
+const Collection_Collection = require('../Collection/Collection.cjs');
+const RovingFocus_utils = require('../RovingFocus/utils.cjs');
+const shared_useTypeahead = require('../shared/useTypeahead.cjs');
 const Listbox_utils = require('./utils.cjs');
 const shared_getActiveElement = require('../shared/getActiveElement.cjs');
 const Listbox_ListboxRoot = require('./ListboxRoot.cjs');

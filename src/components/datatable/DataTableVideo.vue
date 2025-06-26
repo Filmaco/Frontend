@@ -24,6 +24,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem
 } from '@/components/ui/dropdown-menu'
 import {
   FlexRender,
@@ -64,7 +65,7 @@ import {
 import { inject, onMounted, provide, ref, watch, h } from 'vue'
 import { cn, valueUpdater } from '@/lib/utils'
 import { EllipsisVertical } from 'lucide-vue-next'
-import { ArrowUpDown, ChevronDown, Trash2 } from 'lucide-vue-next'
+import { ArrowUpDown, ChevronDown, Trash2, Pencil } from 'lucide-vue-next'
 import { defineEmits } from 'vue'
 
 const props = defineProps<{
@@ -103,6 +104,8 @@ const table = useVueTable({
 const emit = defineEmits<{
   (event: 'handle-click-get-id', id: number): void;
    (event: 'inative-video', id: number): void;
+    (event: 'ativar-por-id', id: number): void;
+     (event: 'inativar-por-id', id: number): void;
 }>();['handle-click-get-id'];
 
 const handleClickId = (data: TData) => {
@@ -112,11 +115,18 @@ const handleClickId = (data: TData) => {
     emit('handle-click-get-id', video_id)
 }
 
-const inativeVideo = (data: TData) => {
+const inativar = (data: TData) => {
     const {video_id} = data as unknown as {video_id: number}
-    console.log(video_id);
+    console.log('DATATABLE',video_id);
     
-    emit('inative-video', video_id)
+    emit('inativar-por-id', video_id)
+}
+
+const ativar = (data: TData) => {
+    const {video_id} = data as unknown as {video_id: number}
+        console.log('DATATABLE',video_id);
+
+    emit('ativar-por-id', video_id)
 }
 
 </script>
@@ -149,9 +159,24 @@ const inativeVideo = (data: TData) => {
                       <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
                     </TableCell>
                     <TableCell>
-                        <Button @click.stop="inativeVideo(row.original)" variant="destructive" size="icon">
-                          <Trash2/>
-                        </Button>
+                        <DropdownMenu>
+                        
+                          <DropdownMenuTrigger  @click.stop>
+                            <Pencil/>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent >
+                             <DropdownMenuItem
+                             v-if="(row.original as any).status === 'ativo'" 
+                             @click="inativar(row.original)">
+                              <span>Inativar</span>
+                            </DropdownMenuItem>
+                             <DropdownMenuItem
+                             v-if="(row.original as any).status === 'inativo'" 
+                             @click="ativar(row.original)">
+                              <span>Ativar</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                     </TableCell>
                   </TableRow>
                 <TableRow v-if="row.getIsExpanded()">

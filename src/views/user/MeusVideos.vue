@@ -126,8 +126,8 @@ export default defineComponent({
                     visualizacoes: item.visualizacoes,
                     nome_usuario: item.nome_usuario,
                     status: item.status,
-                    criado_em: item.criado_em,
-                    atualizado_em: item.atualizado_em,
+                    criado_em: this.formatDate(item.criado_em),
+                    atualizado_em: this.formatDate(item.atualizado_em),
                     
                 }))
                 
@@ -137,20 +137,39 @@ export default defineComponent({
                 console.error('Erro ao buscar vídeos:', error);
             }
         },
+         formatDate(dateString: any) {
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0'); 
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+            },
         async goToPageVideWithId(id:number) {
             //router.push({ name: 'Video.Visualizar', params: { id } })
             this.videoIdSelecionado = id;
             this.isDialogOpen = true;
         },
-        async inativeVideo(id:number) {
-            console.log('video ', id, ' inativado');
+        inativar(id: number) {
             VideoService.inativarVideo(id)
-            .then(response => {
-                window.location.reload();
+            .then((response) => {
+                window.location.reload()
                 return response;
-                
             })
-            .catch(error => {return error})
+            .catch((error) => console.log(error)
+            )
+        },
+
+        ativar(id: number) {
+            VideoService.ativarVideo(id)
+            .then((response) => {
+                window.location.reload()
+                return response;
+            })
+            .catch((error) => console.log(error)
+            )
         },
         async loadItems(items:any) { 
             try {
@@ -220,7 +239,7 @@ export default defineComponent({
 
         <div class="mt-10">
             <p class="text-xl font-semibold mb-4">Meus Vídeos</p>
-            <DataTableVideo :data="data" :columns="columns" @handle-click-get-id="goToPageVideWithId" @inative-video="inativeVideo"/>
+            <DataTableVideo :data="data" :columns="columns" @handle-click-get-id="goToPageVideWithId" @ativar-por-id="ativar" @inativar-por-id="inativar"/>
 
             <AlertDialog v-model:open="isDialogOpen">
                 <AlertDialogContent class="max-w-[900px]">

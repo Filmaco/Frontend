@@ -1,6 +1,6 @@
 import { defineComponent, toRefs, ref, createBlock, openBlock, unref, withCtx, createVNode, renderSlot } from 'vue';
-import { u as useCollection } from '../Collection/Collection.js';
 import { useVModel } from '@vueuse/core';
+import { u as useCollection } from '../Collection/Collection.js';
 import { f as focusFirst, E as ENTRY_FOCUS, a as EVENT_OPTIONS } from './utils.js';
 import { u as useDirection } from '../shared/useDirection.js';
 import { c as createContext } from '../shared/createContext.js';

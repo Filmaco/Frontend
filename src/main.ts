@@ -3,6 +3,7 @@ import App from './App.vue'
 import './assets/main.css'
 import axios from 'axios'
 import router from './routes'
+import VueApexCharts from 'vue3-apexcharts'
 
 const app = createApp(App)
 
@@ -14,5 +15,5 @@ if (token) {
 }
 
 
-
+app.component('ApexChart', VueApexCharts)
 app.mount('#app')

@@ -89,6 +89,14 @@ import axios from "axios";import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select'
+import { 
+  TagsInput,
+  TagsInputInput, 
+  TagsInputItem, 
+  TagsInputItemDelete, 
+  TagsInputItemText 
+} from '@/components/ui/tags-input'
+
 
 export default {
   components: {
@@ -135,12 +143,19 @@ export default {
     SelectLabel,
     SelectTrigger,
     SelectValue,
+    TagsInput,
+    TagsInputInput, 
+    TagsInputItem, 
+    TagsInputItemDelete, 
+    TagsInputItemText
   },
   data() {
     return {
+      showTooltip: false,
+      mensagemTooltip: '',
       data: {
         user: {
-          id: null,
+          id: 0,
           nome_completo: '',
           email: '',
           avatar: '',
@@ -191,185 +206,59 @@ export default {
       },
       enviando: false,
       tipos: [
-        { nome: "Documentário", id: "documentário" },
-        { nome: "Música", id: "clipe musical" },
-        { nome: "Filme", id: "longa-metragem" },
-        { nome: "Curta-metragem", id: "curta-metragem" },
-        { nome: "Vlog", id: "vlog" },
-        { nome: "Anime", id: "anime" },
-        { nome: "Série", id: "serie" },
-        { nome: "Gameplay", id: "gameplay" },
-        { nome: "Tutorial", id: "tutorial" },
-        { nome: "Review", id: "review" },
-        { nome: "Reação", id: "reacao" },
-        { nome: "Podcast", id: "podcast" },
-        { nome: "Entrevista", id: "entrevista" },
-        { nome: "Comédia", id: "comedia" },
-        { nome: "Notícia", id: "noticia" },
-        { nome: "Educacional", id: "educacional" },
-        { nome: "Ao vivo", id: "ao vivo" },
-        { nome: "Cobertura de Evento", id: "cobertura de evento" },
-        { nome: "Animação", id: "animacao" },
-        { nome: "Experiência Social", id: "experiencia social" },
-        { nome: "Unboxing", id: "unboxing" },
-        { nome: "Viagem", id: "viagem" },
-        { nome: "Lifestyle", id: "lifestyle" },
-        { nome: "Motivacional", id: "motivacional" },
-        { nome: "Paródia", id: "parodia" }
+          { nome: "Documentário", id: "documentario" },
+          { nome: "Música", id: "clipe musical" },
+          { nome: "Filme", id: "longa-metragem" },
+          { nome: "Curta-metragem", id: "curta-metragem" },
+          { nome: "Série", id: "serie" },
+          { nome: "Animação", id: "animacao" },
 
         ],
         generos: [
-        { nome: "Natureza", tipoId: "documentário" },
-        { nome: "História", tipoId: "documentário" },
-        { nome: "Biografia", tipoId: "documentário" },
-        { nome: "Científico", tipoId: "documentário" },
-        { nome: "Investigativo", tipoId: "documentário" },
-        { nome: "Cultural", tipoId: "documentário" },
+          { nome: "Natureza", tipoId: "documentario" },
+          { nome: "História", tipoId: "documentario" },
+          { nome: "Biografia", tipoId: "documentario" },
+          { nome: "Científico", tipoId: "documentario" },
+          { nome: "Investigativo", tipoId: "documentario" },
+          { nome: "Cultural", tipoId: "documentario" },
 
-        // Música
-        { nome: "Rock", tipoId: "clipe musical" },
-        { nome: "Pop", tipoId: "clipe musical" },
-        { nome: "Jazz", tipoId: "clipe musical" },
-        { nome: "Clássica", tipoId: "clipe musical" },
-        { nome: "Eletrônica", tipoId: "clipe musical" },
-        { nome: "Indie", tipoId: "clipe musical" },
-        { nome: "Reggae", tipoId: "clipe musical" },
+          // Música
+          { nome: "Rock", tipoId: "clipe musical" },
+          { nome: "Pop", tipoId: "clipe musical" },
+          { nome: "Jazz", tipoId: "clipe musical" },
+          { nome: "Clássica", tipoId: "clipe musical" },
+          { nome: "Eletrônica", tipoId: "clipe musical" },
+          { nome: "Indie", tipoId: "clipe musical" },
+          { nome: "Reggae", tipoId: "clipe musical" },
 
-        // Longa-metragem
-        { nome: "Ação", tipoId: "longa-metragem" },
-        { nome: "Comédia", tipoId: "longa-metragem" },
-        { nome: "Drama", tipoId: "longa-metragem" },
-        { nome: "Terror", tipoId: "longa-metragem" },
-        { nome: "Ficção Científica", tipoId: "longa-metragem" },
-        { nome: "Suspense", tipoId: "longa-metragem" },
-        { nome: "Romance", tipoId: "longa-metragem" },
-        { nome: "Aventura", tipoId: "longa-metragem" },
+          // Longa-metragem
+          { nome: "Ação", tipoId: "longa-metragem" },
+          { nome: "Comédia", tipoId: "longa-metragem" },
+          { nome: "Drama", tipoId: "longa-metragem" },
+          { nome: "Terror", tipoId: "longa-metragem" },
+          { nome: "Ficção Científica", tipoId: "longa-metragem" },
+          { nome: "Suspense", tipoId: "longa-metragem" },
+          { nome: "Romance", tipoId: "longa-metragem" },
+          { nome: "Aventura", tipoId: "longa-metragem" },
 
-        // Curta-metragem
-        { nome: "Experimental", tipoId: "curta-metragem" },
-        { nome: "Drama", tipoId: "curta-metragem" },
-        { nome: "Animação", tipoId: "curta-metragem" },
-        { nome: "Social", tipoId: "curta-metragem" },
+          // Curta-metragem
+          { nome: "Experimental", tipoId: "curta-metragem" },
+          { nome: "Drama", tipoId: "curta-metragem" },
+          { nome: "Animação", tipoId: "curta-metragem" },
+          { nome: "Social", tipoId: "curta-metragem" },
 
-        // Vlog
-        { nome: "Dia a Dia", tipoId: "vlog" },
-        { nome: "Estudo", tipoId: "vlog" },
-        { nome: "Fitness", tipoId: "vlog" },
-        { nome: "Rotina", tipoId: "vlog" },
+          // Série
+          { nome: "Drama", tipoId: "serie" },
+          { nome: "Comédia", tipoId: "serie" },
+          { nome: "Suspense", tipoId: "serie" },
+          { nome: "Policial", tipoId: "serie" },
+          { nome: "Fantasia", tipoId: "serie" },
 
-        // Anime
-        { nome: "Shounen", tipoId: "anime" },
-        { nome: "Shoujo", tipoId: "anime" },
-        { nome: "Seinen", tipoId: "anime" },
-        { nome: "Isekai", tipoId: "anime" },
-        { nome: "Fantasia", tipoId: "anime" },
+          // Animação
+          { nome: "Curta", tipoId: "animacao" },
+          { nome: "3D", tipoId: "animacao" },
+          { nome: "2D", tipoId: "animacao" },
 
-        // Série
-        { nome: "Drama", tipoId: "serie" },
-        { nome: "Comédia", tipoId: "serie" },
-        { nome: "Suspense", tipoId: "serie" },
-        { nome: "Policial", tipoId: "serie" },
-        { nome: "Fantasia", tipoId: "serie" },
-
-        // Gameplay
-        { nome: "FPS", tipoId: "gameplay" },
-        { nome: "RPG", tipoId: "gameplay" },
-        { nome: "MOBA", tipoId: "gameplay" },
-        { nome: "Simulação", tipoId: "gameplay" },
-        { nome: "Terror", tipoId: "gameplay" },
-        { nome: "Aventura", tipoId: "gameplay" },
-        { nome: "Plataforma", tipoId: "gameplay" },
-        { nome: "Corrida", tipoId: "gameplay" },
-        { nome: "Esportes", tipoId: "gameplay" },
-        { nome: "Battle Royale", tipoId: "gameplay" },
-        { nome: "Survival", tipoId: "gameplay" },
-        { nome: "Stealth", tipoId: "gameplay" },
-        { nome: "Sandbox", tipoId: "gameplay" },
-        { nome: "Hack and Slash", tipoId: "gameplay" },
-        { nome: "Point and Click", tipoId: "gameplay" },
-        { nome: "Puzzle", tipoId: "gameplay" },
-        { nome: "Metroidvania", tipoId: "gameplay" },
-        { nome: "Idle / Incremental", tipoId: "gameplay" },
-        { nome: "Shoot 'em up", tipoId: "gameplay" },
-        { nome: "Fighting", tipoId: "gameplay" },
-        { nome: "Roguelike", tipoId: "gameplay" },
-        { nome: "Tycoon / Gestão", tipoId: "gameplay" },
-        { nome: "Visual Novel", tipoId: "gameplay" },
-
-        // Tutorial
-        { nome: "Tecnologia", tipoId: "tutorial" },
-        { nome: "Culinária", tipoId: "tutorial" },
-        { nome: "Artesanato", tipoId: "tutorial" },
-        { nome: "Beleza", tipoId: "tutorial" },
-
-        // Review
-        { nome: "Produtos", tipoId: "review" },
-        { nome: "Filmes", tipoId: "review" },
-        { nome: "Jogos", tipoId: "review" },
-
-        // Reação
-        { nome: "Música", tipoId: "reacao" },
-        { nome: "Vídeos virais", tipoId: "reacao" },
-
-        // Podcast
-        { nome: "Entrevista", tipoId: "podcast" },
-        { nome: "Opinião", tipoId: "podcast" },
-        { nome: "Cultura pop", tipoId: "podcast" },
-
-        // Entrevista
-        { nome: "Profissionais", tipoId: "entrevista" },
-        { nome: "Público", tipoId: "entrevista" },
-
-        // Comédia
-        { nome: "Stand-up", tipoId: "comedia" },
-        { nome: "Sketche", tipoId: "comedia" },
-
-        // Notícia
-        { nome: "Atualidades", tipoId: "noticia" },
-        { nome: "Tecnologia", tipoId: "noticia" },
-
-        // Educacional
-        { nome: "Matemática", tipoId: "educacional" },
-        { nome: "História", tipoId: "educacional" },
-        { nome: "Ciências", tipoId: "educacional" },
-
-        // Ao vivo
-        { nome: "Gameplay", tipoId: "ao vivo" },
-        { nome: "Bate-papo", tipoId: "ao vivo" },
-
-        // Cobertura de evento
-        { nome: "Show", tipoId: "cobertura de evento" },
-        { nome: "Feira", tipoId: "cobertura de evento" },
-        { nome: "Lançamento", tipoId: "cobertura de evento" },
-
-        // Animação
-        { nome: "Curta", tipoId: "animacao" },
-        { nome: "3D", tipoId: "animacao" },
-        { nome: "2D", tipoId: "animacao" },
-
-        // Experiência social
-        { nome: "Interações", tipoId: "experiencia social" },
-        { nome: "Psicológicas", tipoId: "experiencia social" },
-
-        // Unboxing
-        { nome: "Tecnologia", tipoId: "unboxing" },
-        { nome: "Brinquedos", tipoId: "unboxing" },
-
-        // Viagem
-        { nome: "Internacional", tipoId: "viagem" },
-        { nome: "Nacional", tipoId: "viagem" },
-
-        // Lifestyle
-        { nome: "Beleza", tipoId: "lifestyle" },
-        { nome: "Rotina", tipoId: "lifestyle" },
-
-        // Motivacional
-        { nome: "Desenvolvimento pessoal", tipoId: "motivacional" },
-        { nome: "Autoajuda", tipoId: "motivacional" },
-
-        // Paródia
-        { nome: "Música", tipoId: "parodia" },
-        { nome: "Filmes", tipoId: "parodia" }
       ],
       duration: ''
     }
@@ -377,15 +266,19 @@ export default {
   mounted() { 
     UserService.perfil()
       .then(response => {
-        this.data.user = response.usuario;
+        this.data.user = {
+          id: response.usuario.usuario_id, 
+          nome_completo: response.usuario.nome_completo,
+          email: response.usuario.email,
+          avatar: response.usuario.foto_perfil,
+          tipo: response.usuario.tipo
+        } ;
         // console.log('user: ', this.data.user);
         this.data.user.tipo = response.usuario.tipo
         this.user.usuario_id = response.usuario.usuario_id;
-        
       })
       .catch((e) => {
           console.log(e);
-          
       });
   },
   computed: {
@@ -402,104 +295,170 @@ export default {
   methods: {
      closeDialog() {
       this.isDialogOpen = false;
-    },
+      },
 
      handleImageUpload(event: Event) {
-      const target = event.target as HTMLInputElement;
-      const files = target.files;
-      if (files && files.length > 0) {
-        this.video.imagem = files[0];
-      }
-    },
-    validarCampos() {
-     
-
-      if (!this.video.nome) this.erros.nome = 'Nome é obrigatório'
-      if (!this.video.descricao) this.erros.descricao = 'Descrição é obrigatória'
-      if (!this.video.tipo) this.erros.tipo = 'Tipo é obrigatório'
-      if (!this.video.genero) this.erros.genero = 'Gênero é obrigatório'
-      if (!this.video.duracao) {
-        this.erros.duracao = 'Duração é obrigatória'
-      }
-
-      if (!this.video.link) {
-        this.erros.link = 'Link do vídeo é obrigatório'
-      } else {
-        const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/
-        if (!urlRegex.test(this.video.link)) {
-          this.erros.link = 'Formato de link inválido'
+        const target = event.target as HTMLInputElement;
+        const files = target.files;
+        if (files && files.length > 0) {
+          this.video.imagem = files[0];
         }
-      }
+      },
 
-      const errosAtivos = Object.values(this.erros).filter(erro => erro !== '')
-      if (errosAtivos.length > 0) {
-        const mensagens = errosAtivos.join(', ')
-        return false
-      }
+      validarCampos() {
+        if (!this.video.nome) this.erros.nome = 'Nome é obrigatório'
+        if (!this.video.descricao) this.erros.descricao = 'Descrição é obrigatória'
+        if (!this.video.tipo) this.erros.tipo = 'Tipo é obrigatório'
+        if (!this.video.genero) this.erros.genero = 'Gênero é obrigatório'
+        if (!this.video.duracao) {
+          this.erros.duracao = 'Duração é obrigatória'
+        }
 
-      return true
-    },
-
-
-    async criarVideo() {
-      if (!this.validarCampos()) return
-
-
-      const formData = new FormData();
-      formData.append('usuario_id', this.user.usuario_id);
-      formData.append('nome', this.video.nome);
-      formData.append('descricao', this.video.descricao);
-      formData.append('tipo', this.video.tipo);
-      formData.append('genero', this.video.genero);
-      formData.append('duracao', this.video.duracao);
-      formData.append('link', this.video.link);
-      formData.append('imagem', this.video.imagem as File);
-      formData.append('tags', this.video.tags.join(','));
-
-      try {
-        const response = await axios.post('http://localhost:8000/videos/add', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-       console.log(formData);
-      this.closeDialog() 
-       return response
-       
-      } catch (error) {
-        console.log(error, this.video);
-        
-      } finally {
-        this.enviando = false;
-      }
-    },
-    
-     formatDuration(event) {
-      let value = event.target.value.replace(/\D/g, '')
-      let hours = '', minutes = '', seconds = ''
-
-      if (value.length > 0) {
-        if (value.length <= 2) {
-          seconds = value
-        } else if (value.length <= 4) {
-          minutes = value.slice(0, -2)
-          seconds = value.slice(-2)
+        if (!this.video.link) {
+          this.erros.link = 'Link do vídeo é obrigatório'
         } else {
-          hours = value.slice(0, -4)
-          minutes = value.slice(-4, -2)
-          seconds = value.slice(-2)
+          const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/
+          if (!urlRegex.test(this.video.link)) {
+            this.erros.link = 'Formato de link inválido'
+          }
         }
 
-        const formatted =
-          (hours ? `${parseInt(hours)}h ` : '') +
-          (minutes ? `${parseInt(minutes)}m ` : '') +
-          (seconds ? `${parseInt(seconds)}s` : '')
+        const errosAtivos = Object.values(this.erros).filter(erro => erro !== '')
+        if (errosAtivos.length > 0) {
+          const mensagens = errosAtivos.join(', ')
+          return false
+        }
 
-        this.video.duracao = formatted.trim()
-      } else {
-       this.video.duracao = ''
-      }
-    },
-  }
-  
+        return true
+      },
+
+    async validarImagem(): Promise<boolean> {
+        const imagem = this.video.imagem as File;
+
+        if (!imagem) {
+          this.exibirTooltip("Imagem não selecionada.")
+          return false;
+        }
+
+        // Máximo de 2MB
+        const tamanhoMaximo = 2 * 1024 * 1024;
+        if (imagem.size > tamanhoMaximo) {
+          this.exibirTooltip("A imagem deve ter no máximo 2MB.");
+          return false;
+        }
+
+        // Verificar dimensões e proporção
+        const dimensoesOk = await new Promise<boolean>((resolve) => {
+          const img = new Image();
+          img.onload = () => {
+            const largura = img.width;
+            const altura = img.height;
+            const proporcao = largura / altura;
+
+            const proporcaoIdeal = 16 / 9;
+            const margemErro = 0.05; // Aceita pequena variação
+
+            const proporcaoOk = Math.abs(proporcao - proporcaoIdeal) < margemErro;
+            const tamanhoOk = largura >= 640 && largura <= 1920 && altura >= 360 && altura <= 1080;
+
+            if (proporcaoOk && tamanhoOk) {
+              resolve(true);
+            } else {
+              this.exibirTooltip(`A imagem deve ter proporção 16:9 e dimensões entre 640x360 e 1920x1080.\nTamanho atual: ${largura}x${altura}`);
+              resolve(false);
+            }
+          };
+          img.onerror = () => {
+            this.exibirTooltip("Erro ao carregar imagem.");
+            resolve(false);
+          };
+
+          const reader = new FileReader();
+          reader.onload = (e) => {
+            if (e.target?.result) {
+              img.src = e.target.result.toString();
+            } else {
+              resolve(false);
+            }
+          };
+          reader.readAsDataURL(imagem);
+        });
+
+        return dimensoesOk;
+      },
+
+      async criarVideo() {
+        if (!this.validarCampos()) return
+
+        const imagemValida = await this.validarImagem();
+        if (!imagemValida) {
+          this.exibirTooltip('Imagem invalida')
+          return
+        }
+
+        const formData = new FormData();
+        formData.append('usuario_id', this.user.usuario_id);
+        formData.append('nome', this.video.nome);
+        formData.append('descricao', this.video.descricao);
+        formData.append('tipo', this.video.tipo);
+        formData.append('genero', this.video.genero);
+        formData.append('duracao', this.video.duracao);
+        formData.append('link', this.video.link);
+        formData.append('imagem', this.video.imagem as File);
+        formData.append('tags', this.video.tags.join(','));
+
+        try {
+          const response = await axios.post('http://localhost:8000/videos/add', formData, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          });
+        console.log(formData);
+        this.closeDialog() 
+        return response
+        
+        } catch (error) {
+          console.log(error, this.video);
+          
+        } finally {
+          this.enviando = false;
+        }
+      },
+      
+      formatDuration(event) {
+        let value = event.target.value.replace(/\D/g, '')
+        let hours = '', minutes = '', seconds = ''
+
+        if (value.length > 0) {
+          if (value.length <= 2) {
+            seconds = value
+          } else if (value.length <= 4) {
+            minutes = value.slice(0, -2)
+            seconds = value.slice(-2)
+          } else {
+            hours = value.slice(0, -4)
+            minutes = value.slice(-4, -2)
+            seconds = value.slice(-2)
+          }
+
+          const formatted =
+            (hours ? `${parseInt(hours)}h ` : '') +
+            (minutes ? `${parseInt(minutes)}m ` : '') +
+            (seconds ? `${parseInt(seconds)}s` : '')
+
+          this.video.duracao = formatted.trim()
+        } else {
+        this.video.duracao = ''
+        }
+      },
+
+      exibirTooltip(texto, duracao = 3000) {
+        this.mensagemTooltip = texto
+        this.showTooltip = true
+        setTimeout(() => {
+          this.showTooltip = false
+        }, duracao)
+      },
+    }
+    
 }
 
 </script>
@@ -517,12 +476,7 @@ export default {
           
           <div class="flex justify-between w-full">
             <div class="w-[40%]">
-              <div class="relative w-full max-w-sm items-center">
-                <Input id="search" type="text" placeholder="Pesquisar..." class="pl-10" />
-                <span class="absolute start-0 inset-y-0 flex items-center justify-center px-2">
-                  <Search class="size-4 text-muted-foreground" />
-                </span>
-              </div>
+             
             </div>
             <div class="flex content-center items-center gap-2">
               <AlertDialog  v-model:open="isDialogOpen">
@@ -546,7 +500,7 @@ export default {
     
                     <form @submit.prevent="criarVideo" class="w-full">
                       <div class="flex gap-6">
-                        <div class="w-[50%]">
+                        <div class="w-[80%]">
                           <Label class="ml-2">Título</Label>
                           <Input v-model="video.nome" placeholder="Título" class="ml-2 mb-1" />
                           <p v-if="erros.nome" class="text-red-500 text-sm pl-3 pt-1">{{ erros.nome }}</p>
@@ -558,16 +512,17 @@ export default {
                             <div>
                               <Label class="ml-2 ">Tipo do Video</Label>
                               <Select v-model="video.tipo">
-                                <SelectTrigger>
+                                <SelectTrigger class="w-[170px]">
                                   <SelectValue placeholder="Selecione o tipo" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectGroup>
+                                </SelectTrigger class="w-full">
+                                <SelectContent class="w-full">
+                                  <SelectGroup class="w-full">
                                     <SelectLabel>Tipos</SelectLabel>
                                     <SelectItem
                                       v-for="tipo in tipos"
                                       :key="tipo.id"
                                       :value="tipo.id"
+                                      class="w-full"
                                     >
                                       {{ tipo.nome }}
                                     </SelectItem>
@@ -579,8 +534,8 @@ export default {
 
                             <div>
                               <Label class="ml-2 ">Gênero do Video</Label>
-                              <Select v-model="video.genero" :disabled="!video.tipo">
-                                <SelectTrigger>
+                              <Select v-model="video.genero" :disabled="!video.tipo" class="">
+                                <SelectTrigger class="w-[170px]">
                                   <SelectValue placeholder="Selecione o gênero" />
                                 </SelectTrigger>
                                 <SelectContent>
@@ -598,10 +553,6 @@ export default {
                               </Select>
                               <p v-if="erros.genero" class="text-red-500 text-sm pl-3 pt-1">{{ erros.genero }}</p>
                             </div>
-                          
-
-                          
-
                           </div>
                           <Label class="ml-2 ">Tags do Video</Label>
                           <TagsInput v-model="video.tags" class="mb-4 ml-2">
@@ -631,8 +582,8 @@ export default {
                       </div>
 
                       <div class="w-full flex justify-between mt-16 mx-2">
-                         <AlertDialogCancel class="">
-                           <Button class=" bg-black hover:bg-[#513188] w-full" style="border-radius: 30px;">Cancelar</Button>
+                         <AlertDialogCancel class=" bg-black hover:bg-[#513188] w-[20%]" style="border-radius: 30px;">
+                           <Button class="w-full h-full">Cancelar</Button>
                          </AlertDialogCancel>
                       
                         <Button class="w-[20%] bg-[#7E57C2] hover:bg-[#513188]" style="border-radius: 30px;" type="submit">Adicionar</Button>
@@ -642,61 +593,6 @@ export default {
                 </AlertDialogContent>
               </AlertDialog>
 
-            <div>
-              <DropdownMenu>
-                <DropdownMenuTrigger as-child>     
-                  <BellDot :size="20" style="cursor: pointer;" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                class="w-[--reka-dropdown-menu-trigger-width] min-w-[390px] rounded-[20px] border-transparent bg-transparent shadow-[0px]" style="border-radius: 20px;"
-                side="bottom"
-                align="end"
-                
-                >
-                <Card :class="cn('w-[380px]', $attrs.class ?? '')" >
-                    <CardHeader>
-                      <CardTitle>Notifications</CardTitle>
-                      <CardDescription>You have 3 unread messages.</CardDescription>
-                    </CardHeader>
-                    <CardContent class="grid gap-4">
-                      <div class=" flex items-center space-x-4 rounded-md border p-4">
-                        <Bell />
-                        <div class="flex-1 space-y-1">
-                          <p class="text-sm font-medium leading-none">
-                            Push Notifications
-                          </p>
-                          <p class="text-sm text-muted-foreground">
-                            Send notifications to device.
-                          </p>
-                        </div>
-                        <Switch />
-                      </div>
-                      <div>
-                        <div
-                          v-for="(notification, index) in data.notifications" :key="index"
-                          class="mb-4 grid grid-cols-[25px_minmax(0,1fr)] items-start pb-4 last:mb-0 last:pb-0"
-                        >
-                          <span class="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
-                          <div class="space-y-1">
-                            <p class="text-sm font-medium leading-none">
-                              {{ notification.title }}
-                            </p>
-                            <p class="text-sm text-muted-foreground">
-                              {{ notification.description }}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button class="w-full">
-                        <Check class="mr-2 h-4 w-4" /> Mark all as read
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
             <div v-if="token">
               <div >
                 <NavUser :user="data.user" />
@@ -725,6 +621,14 @@ export default {
       </div>
     </SidebarInset>
   </SidebarProvider>
+  <div class="relative inline-block">
+    <div
+     
+      class="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 bg-red-600 text-white text-sm px-3 py-1 rounded shadow z-10 transition-opacity duration-300"
+    >
+      {{ mensagemTooltip }}
+    </div>
+  </div>
 </template>
 
 <style scoped>

@@ -67,25 +67,25 @@ const columns: ColumnDef<Data>[] = [
         }, () => ['Status', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
       },
       cell: ({ row }) => {
-       const status = row.getValue('status');
-    let bgClass = '';
+        const status = row.getValue('status');
+        let bgClass = '';
 
-    if (row.getValue('status') == "ativo") {
-      return h('div', { class: 'lowercase text-center bg-green-100 text-green-800 rounded-xl '  }, row.getValue('status'))
-    } else {
-      return h('div', { class: 'lowercase text-center bg-red-100 text-red-800 rounded-xl' },  row.getValue('status'))
-    }
+        if (row.getValue('status') == "ativo") {
+          return h('div', { class: 'lowercase text-center bg-green-100 text-green-800 rounded-xl '  }, row.getValue('status'))
+        } else {
+          return h('div', { class: 'lowercase text-center bg-red-100 text-red-800 rounded-xl' },  row.getValue('status'))
+        }
 
-  }
+      }
     },
 
-     {
+    {
       accessorKey: 'criado_em',
       header: ({ column }) => {
         return h(Button, {
           variant: 'ghost',
           onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
-        }, () => ['criado_em', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
+        }, () => ['Criado em', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
       },
       cell: ({ row }) => h('div', { class: 'lowercase text-left pl-3' }, row.getValue('criado_em')),
     },
@@ -96,7 +96,7 @@ const columns: ColumnDef<Data>[] = [
         return h(Button, {
           variant: 'ghost',
           onClick: () => column.toggleSorting(column.getIsSorted() === 'asc'),
-        }, () => ['atualizado_em', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
+        }, () => ['Atualizado em', h(ArrowUpDown, { class: 'ml-2 h-4 w-4' })])
       },
       cell: ({ row }) => h('div', { class: 'lowercase text-left pl-3' }, row.getValue('atualizado_em')),
     },

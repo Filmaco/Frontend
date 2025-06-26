@@ -41,7 +41,10 @@ import {
   Podcast,
   Search,
   Plus,
-  Check
+  Check,
+  MessageCircleWarning,
+  Paperclip
+
 } from 'lucide-vue-next'
 import { Input } from '@/components/ui/input'
 import {
@@ -89,6 +92,18 @@ import 'filepond/dist/filepond.min.css';
 import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.css';
 import { CloudUpload, User } from 'lucide-vue-next';
 import { AvaliacaoService } from '@/services/avaliacao.service';
+import DenunciaService from '@/services/denuncia.service';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import EstatisticaService from '@/services/estatistica.service';
+import { VideoService } from '@/services/video.service';
 
 FilePond.registerPlugin(FilePondPluginImagePreview);
 
@@ -131,6 +146,7 @@ export default defineComponent({
     Input,
     Search,
     Plus,
+    MessageCircleWarning,
     AlertDialog,
     AlertDialogAction,
     AlertDialogCancel,
@@ -158,7 +174,15 @@ export default defineComponent({
     Switch,
     CriarPlaylist,
     Checkbox,
-    Trash
+    Trash,
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+    Paperclip,
   },
   data() {
     return {
@@ -179,9 +203,11 @@ export default defineComponent({
           tipo: '',
           link: '',
           imagem: '',
-          nome_usuario: ''
+          nome_usuario: '',
+          usuario_id: 0,
         },
         usuario_id: 0,
+        nome_usuario: '',
         playlist: {
           usuario_id: '',
           titulo: '',
@@ -217,7 +243,13 @@ export default defineComponent({
         total_love: '',
         total_like: '',
         total_dislike: '',
-      }
+      },
+      denuncia: {
+        usuario_id: 0,
+        motivo: '',
+        video_id: 0
+      },
+      seguidores: 0,
     };
   },
 
@@ -225,6 +257,7 @@ export default defineComponent({
     this.id = Number(this.$route.params.id);
     this.handleVideo(this.id);
 
+    console.log('AAAAAAAAAAAAAA',this.data.video);
    
     UserService.perfil()
     .then(async user => {
@@ -232,6 +265,7 @@ export default defineComponent({
       
       this.data.playlist.usuario_id = user.usuario.usuario_id;
       this.data.usuario_id = user.usuario.usuario_id;
+      this.data.nome_usuario = user.usuario.nome_completo;
       console.log('user: ',  this.data.usuario_id);
       
       this.playlist_list = await this.listarPlaylist(this.playlist_list )
@@ -245,14 +279,17 @@ export default defineComponent({
     });
     
     this.comentarios = await this.carregarComentarios(this.comentarios);
-    console.log(this.comentarios);
+    // console.log(this.comentarios);
     
-    console.log( this.is_dialog_open);
+    // console.log( this.is_dialog_open);
     
     AvaliacaoService.listarAvaliacaoPorVideo(this.id)
     // alert(`${this.avaliacao_usuario.avaliacao_id}`)
 
     this.listarAvaliacoes()
+
+    const seguidores_data = await EstatisticaService.estatisticasPorUsuario(Number(this.data.video.usuario_id))
+    this.seguidores = seguidores_data.estatisticas.total_seguidores;
     
     
   },
@@ -278,10 +315,10 @@ export default defineComponent({
     };
   },
   methods: {
-    async handleVideo(id: number) {
+    async handleVideo(id: any) {
       try {
-        const response = await axios.get(`http://localhost:8000/videos/${id}`);
-        //console.log(response.data);
+        const response = await VideoService.buscarPorId(id)
+        console.log(response.data);
 
         this.data.video = {
           video_id: response.data.data.video_id,
@@ -293,10 +330,13 @@ export default defineComponent({
           tipo: response.data.data.tipo,
           link: response.data.data.link,
           imagem: response.data.data.imagem,
-          nome_usuario: response.data.data.nome_usuario
+          nome_usuario: response.data.data.nome_usuario,
+          usuario_id: response.data.data.usuario_id
         };
-
+        console.log(this.data.video);
         this.fetchRelatedVideos(this.data.video.genero);
+        
+        this.seguidores = await this.seguidoresEstatisticas(this.data.video.usuario_id)
 
       } catch (error) {
         console.error('Erro ao carregar vídeo:', error);
@@ -322,43 +362,43 @@ export default defineComponent({
     },
 
    async addPlaylist() {
-    try {
-      const data = new FormData();
-      data.append('usuario_id', this.data.playlist.usuario_id.toString());
-      data.append('titulo', this.data.playlist.titulo);
-      data.append('imagem', this.data.playlist.imagem as File);
+      try {
+        const data = new FormData();
+        data.append('usuario_id', this.data.playlist.usuario_id.toString());
+        data.append('titulo', this.data.playlist.titulo);
+        data.append('imagem', this.data.playlist.imagem as File);
 
 
-      const response = await PlaylistService.criarPlaylist(data);
-      console.log(response);
-      
-      const novaPlaylistId = response.id;
+        const response = await PlaylistService.criarPlaylist(data);
+        console.log(response);
+        
+        const novaPlaylistId = response.id;
 
-      if (!novaPlaylistId) {
-        console.error('Erro: ID da nova playlist não retornado.');
-        return;
+        if (!novaPlaylistId) {
+          console.error('Erro: ID da nova playlist não retornado.');
+          return;
+        }
+
+
+        this.data.playlist_video.playlist_id = String(novaPlaylistId);
+        this.data.playlist_video.video_id = String(this.data.video.video_id);
+
+        const form = new FormData();
+        form.append("playlist_id", this.data.playlist_video.playlist_id);
+        form.append("video_id", this.data.playlist_video.video_id);
+
+
+        await PlaylistService.adicionarVideoNaPlaylist(form);
+
+        this.playlist_list = await this.listarPlaylist([]);
+
+        this.closeDialog();
+        this.data.playlist.titulo = '';
+
+      } catch (error) {
+        console.error('Erro ao adicionar vídeo à nova playlist:', error);
       }
-
-
-      this.data.playlist_video.playlist_id = String(novaPlaylistId);
-      this.data.playlist_video.video_id = String(this.data.video.video_id);
-
-      const form = new FormData();
-      form.append("playlist_id", this.data.playlist_video.playlist_id);
-      form.append("video_id", this.data.playlist_video.video_id);
-
-
-      await PlaylistService.adicionarVideoNaPlaylist(form);
-
-      this.playlist_list = await this.listarPlaylist([]);
-
-      this.closeDialog();
-      this.data.playlist.titulo = '';
-
-    } catch (error) {
-      console.error('Erro ao adicionar vídeo à nova playlist:', error);
-    }
-  },
+    },
 
     async addVideoNaPlaylist(id: any) {
       try {
@@ -533,8 +573,6 @@ export default defineComponent({
       }
     },
 
-
-
     async addAvaliacao(valor) {
       const formData = new FormData();
       formData.append('usuario_id', String(this.data.usuario_id));
@@ -571,23 +609,6 @@ export default defineComponent({
       }
     },
 
-    // async deletarAvaliacao(valor) {
-    //   try {
-    //     await AvaliacaoService.deletarAvaliacao(valor);
-        
-    //     this.edit_avaliacao.avaliacao_id = null;
-    //     this.edit_avaliacao.avaliacao = '';
-    //     this.avaliacao_usuario = { avaliacao: '' , avaliacao_id: ''};
-    //     this.activeIcon = null;
-        
-
-    //     alert("Avaliação removida");
-    //   } catch (error) {
-    //     console.error(error);
-    //     alert("Erro ao remover avaliação");
-    //   }
-    // },
-
     async listarUltimaAvaliacaoPorUsuario(user:any) {
       try {
         const response = await AvaliacaoService.ultimaAvaliacaoDoUsuario(user, this.id)
@@ -618,7 +639,41 @@ export default defineComponent({
         this.total_avaliacoes.total_dislike = avaliacoes_total.dados.total_dislike;
         this.total_avaliacoes.total_like = avaliacoes_total.dados.total_like;
         this.total_avaliacoes.total_love = avaliacoes_total.dados.total_love
-    }
+    },
+
+    async denunciarVideo(motivo) {
+      alert(`video ${this.data.video.video_id} denunciado`)
+      try {
+        this.denuncia.usuario_id = this.data.usuario_id;
+        this.denuncia.video_id = this.id;
+        this.denuncia.motivo = motivo
+        const response = await DenunciaService.criarDenuncia(this.denuncia);
+        router.push({ name: 'Home' })
+        return response;
+      }
+      catch(error) {
+        console.log(error);
+        alert(`opa, nao denunciado`)
+      }
+    },
+
+    async seguidoresEstatisticas(id:any) {
+      try {
+        const response = await EstatisticaService.estatisticasPorUsuario(id)
+        this.seguidores = response.estatisticas.total_seguidores;
+        return response.estatisticas.total_seguidores;
+      }
+      catch(error) {
+        console.log(error)        
+      }
+    },
+     handleFileChange(event) {
+        const file = event.target.files[0]
+        if (file) {
+          this.data.playlist.imagem = file
+        }
+      },
+
   }
 });
 </script>
@@ -647,9 +702,16 @@ export default defineComponent({
         </div>
       </div>
 
-      <div class="flex  border-y-2 items-center content-center mb-10 grid grid-cols-6 gap-3">
-        <div class="flex gap-3 items-center border-r-2 pr-4 col-span-2 justify-center">
-          <div class="flex gap-4 py-6 pr-4 ">
+      <div class="flex  border-y-2 items-center content-center mb-10 grid grid-cols-4 md:gap-3
+      xs:gap-0
+      md:grid-cols-4
+      md:border-x-0
+      md:border-y-2
+      xs:grid-cols-2
+      xs:border
+      " v-if="data.video.nome_usuario !== data.nome_usuario">
+        <div class="flex gap-3 items-center border-r-2 pr-4 justify-center xs:border-b-2 md:border-b-0">
+          <div class="flex gap-4 py-6 pr-4 pl-2">
             <Avatar>
               <AvatarImage src="https://github.com/unovue.png" alt="@unovue" />
               <AvatarFallback>CN</AvatarFallback>
@@ -657,14 +719,13 @@ export default defineComponent({
           </div>
           <div>
             <p>{{ data.video.nome_usuario }}</p>
-            <p class="text-[14px] text-gray-400">300 mil seguidores</p>
+            <p class="text-[14px] text-gray-400" v-if="seguidores == 1">{{ seguidores }} seguidor</p>
+              <p class="text-[14px] text-gray-400" v-else>{{ seguidores }} seguidores</p>
           </div>
-          <div>
-            <Button class="bg-[#7E57C2]" style="border-radius: 30px;">Seguir</Button>
-          </div>
+          
       </div>
       
-      <div class="border-r-2 px-[5%] py-4 flex flex-col items-center ">
+      <div class="md:border-r-2 xs:border-r-0 xs:border-b-2 md:border-b-0 px-[5%] py-4 flex flex-col items-center ">
         <div class="pb-2" style="cursor: pointer;">
           
         </div>
@@ -741,13 +802,30 @@ export default defineComponent({
 
                          <div class="w-full p-3">
                             <form @submit.prevent="addPlaylist">
-                              <div>
+                              <!-- <div>
                                  <label for="imagem" class="w-full h-90 flex flex-col justify-center items-center border-2 border-dashed rounded-lg cursor-pointer text-gray-500 border-[#7E57C2]">
                                 <CloudUpload :size="100" />
                                 <span>Clique para enviar a imagem miniatura</span>
                                 <input type="file" 
                                 @change="(e: any) => data.playlist.imagem = e.target.files[0]" required />
                               </label>
+                              </div> -->
+                              <div class="flex flex-col items-center relative w-full h-[80px] border justify-center items-center rounded-md mb-3">
+                                <label class="cursor-pointer w-full flex justify-center items-center">
+                                    <div
+                                      class="bg-white p-1  flex  w-full h-full justify-center items-center"
+                                    >
+                                      <Paperclip class="w-5 h-5 text-gray-600 mr-2" />
+                                      <p>Adicionar Imagem</p>
+                                    </div>
+
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      class="hidden"
+                                      @change="handleFileChange"
+                                    />
+                                </label>
                               </div>
                               <div class="pb-3">
                                 <Label>Título</Label>
@@ -755,7 +833,7 @@ export default defineComponent({
                               </div>
 
                               <div class="flex justify-end">
-                                <Button @click="closeDialog">Cancelar</Button>
+                                <Button @click="closeDialog" class="mr-2">Cancelar</Button>
                                 <Button type="submit">Criar</Button>
                               </div>
                             </form>
@@ -768,22 +846,219 @@ export default defineComponent({
 
           </div>
         </div>
-      <div class="border-r-2 px-[5%] py-4 flex flex-col items-center">
+      <!-- <div class="border-r-2 px-[5%] py-4 flex flex-col items-center">
         <div class="pb-2">
           <Share2/>
         </div>
         <div>
           <p>Compartilhar</p>
           </div>
+      </div> -->
+      <div class="border-r-2 px-[5%] py-4 flex flex-col items-center">
+        
+          <AlertDialog>
+            <AlertDialogTrigger as-child style="cursor: pointer;">
+              <div class="pb-2">
+                <MessageCircleWarning/>
+              </div>
+              <div>
+                <p>Denunciar videos</p>
+                </div>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Você tem certeza que deseja denunciar este vídeo?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Essa ação é irreversível. A denúncia será enviada para análise da moderação,
+                  e você não poderá cancelá-la depois de confirmada.
+                </AlertDialogDescription>
+
+                <div class="mt-4">
+                  <label class="block mb-2 text-sm font-medium">Selecione o motivo da denúncia:</label>
+                  <Select v-model="denuncia.motivo">
+                    <SelectTrigger class="w-full">
+                      <SelectValue placeholder="Escolha um motivo" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="inapropriado">Conteúdo inapropriado</SelectItem>
+                      <SelectItem value="violencia">Violência ou incitação ao ódio</SelectItem>
+                      <SelectItem value="spam">Spam ou propaganda enganosa</SelectItem>
+                      <SelectItem value="direitos_autorais">Violação de direitos autorais</SelectItem>
+                       <SelectItem value="indisponivel">Video Indisponivel ou impossibilidade de assistir.</SelectItem>
+                    </SelectContent>
+                    
+                  </Select>
+                </div>
+              </AlertDialogHeader>
+
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                <AlertDialogAction :disabled="!denuncia.motivo" @click="denunciarVideo(denuncia.motivo)">
+                  Continuar
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+
+          </AlertDialog>
       </div>
-      <div class="border-r-2 px-[5%] py-4 flex flex-col items-center ">
-        <div class="pb-2">
-          <CircleEllipsis/>
+
+      <div class="flex grid grid-cols-3 gap-4 items-center justify-center">
+        <div class="flex flex-col items-center" @click="toggleIcon('love')" style="cursor: pointer;">
+          <Heart :class="activeIcon === 'love' ? 'fill-black' : 'fill-none'" />
+           <p class="" v-if="total_avaliacoes.total_love">{{ total_avaliacoes.total_love }}</p>
+                <p class="" v-else>0</p>
+        </div>
+        <div class="flex flex-col items-center" @click="toggleIcon('like')" style="cursor: pointer;">
+          <ThumbsUp :class="activeIcon === 'like' ? 'fill-black ' : 'fill-none'" />
+           <p class="" v-if="total_avaliacoes.total_like">{{ total_avaliacoes.total_like }}</p>
+                <p class="" v-else>0</p>
+        </div>
+        <div class="flex flex-col items-center" @click="toggleIcon('dislike')" style="cursor: pointer;">
+          <ThumbsDown :class="activeIcon === 'dislike' ? 'fill-black ' : 'fill-none'" />
+           <p class="" v-if="total_avaliacoes.total_dislike">{{ total_avaliacoes.total_dislike }}</p>
+                <p class="" v-else>0</p>
+        </div>
+      </div>
+      </div>
+     
+       <div class="flex  border-y-2 items-center content-center mb-10 grid grid-cols-3 md:gap-3 xs:gap-0 md:border-l-0 xs:border-l-2 md:border-r-0 xs:border-r-2" v-else>
+        <div class="flex gap-3 items-center md:border-r-2 xs:border-r-0 pr-4 justify-center md:col-span-1 xs:col-span-3 md:border-b-0 xs:border-b-2">
+          <div class="flex gap-4 py-6 pr-4">
+            <Avatar>
+              <AvatarImage src="https://github.com/unovue.png" alt="@unovue" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+          </div>
+          <div>
+            <p>{{ data.video.nome_usuario }}</p>
+             <p class="text-[14px] text-gray-400" v-if="seguidores == 1">{{ seguidores }} seguidor</p>
+              <p class="text-[14px] text-gray-400" v-else>{{ seguidores }} seguidores</p>
+         
+          </div>
+          
+      </div>
+      
+      <div class="border-r-2 px-[5%] py-4 flex flex-col items-center md:col-span-1 xs:col-span-2">
+        <div class="pb-2" style="cursor: pointer;">
+          
         </div>
         <div>
-          <p>Mais</p>
+              <AlertDialog v-model:open="is_dialog_open">
+                <AlertDialogTrigger as-child>
+                 
+                    <div class="flex flex-col items-center" @click="initialDialog" style="cursor: pointer;">
+                      <CirclePlus/>
+                      <p> Adicionar à Playlist</p>
+
+                    </div>
+                  
+            
+                </AlertDialogTrigger>
+
+                <AlertDialogContent class="w-[430px]"  v-if="step === 'selecionar'">
+                  <div v-if="step === 'selecionar'">
+
+                    <AlertDialogHeader class="pb-2">
+                      <AlertDialogTitle>Salvar em</AlertDialogTitle>
+                    </AlertDialogHeader>
+
+                    <Separator orientation="horizontal"/>
+                    
+                   <div class="space-y-2 my-5">
+                      <div
+                        v-for="(playlist, index) in playlist_list"
+                        :key="index"
+                        class="flex items-center space-x-2"
+                      >
+                      <Checkbox
+                        :id="`playlist-${index}`"
+                        :modelValue="video_in_playlists.includes(playlist.id)"
+                        @update:modelValue="(checked) => toggleVideoInPlaylist(playlist.id, checked)"
+                      />
+
+
+
+                        <label
+                          :for="`playlist-${index}`"
+                          class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {{ playlist.titulo }}
+                        </label>
+                      </div>
+                    </div>
+
+                    <div class="flex mt-3">
+                    </div>
+                    
+                    <Separator orientation="horizontal"/>
+                    
+                    <AlertDialogFooter>
+                      
+                      <div class="mt-2 flex w-full justify-between">
+                        <Button class="mr-2" @click="closeDialog">Sair</Button>
+                      
+                            <Button @click="openCriar">Criar nova playlist</Button>
+
+                      </div>
+                        
+                    </AlertDialogFooter>
+
+                  </div>
+                </AlertDialogContent>
+
+                  <AlertDialogContent class="w-[400px]" v-if="step === 'criar'">
+                  <div >
+
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Salvar Playlist</AlertDialogTitle>
+                    </AlertDialogHeader>
+
+                         <div class="w-full p-3">
+                            <form @submit.prevent="addPlaylist">
+                               <div class="flex flex-col items-center relative w-full h-[80px] border justify-center items-center rounded-md mb-3">
+                                <label class="cursor-pointer w-full flex justify-center items-center">
+                                    <div
+                                      class="bg-white p-1  flex  w-full h-full justify-center items-center"
+                                    >
+                                      <Paperclip class="w-5 h-5 text-gray-600 mr-2" />
+                                      <p>Adicionar Imagem</p>
+                                    </div>
+
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      class="hidden"
+                                      @change="handleFileChange"
+                                    />
+                                </label>
+                              </div>
+                              <div class="pb-3">
+                                <Label>Título</Label>
+                                <Input v-model="data.playlist.titulo" placeholder="Título da Playlist" />
+                              </div>
+
+                              <div class="flex justify-end">
+                                <Button @click="closeDialog" class="mr-2">Cancelar</Button>
+                                <Button type="submit">Criar</Button>
+                              </div>
+                            </form>
+                          </div>
+
+                  </div>
+                </AlertDialogContent>
+
+              </AlertDialog>
+
           </div>
-      </div>
+        </div>
+      <!-- <div class="border-r-2 px-[5%] py-4 flex flex-col items-center">
+        <div class="pb-2">
+          <Share2/>
+        </div>
+        <div>
+          <p>Compartilhar</p>
+          </div>
+      </div> -->
 
       <div class="flex grid grid-cols-3 gap-4 items-center justify-center ">
         <div class="flex flex-col items-center" @click="toggleIcon('love')" style="cursor: pointer;">
@@ -803,7 +1078,6 @@ export default defineComponent({
         </div>
       </div>
       </div>
-     
 
       <div class="m">
         <p>{{ data.video.descricao }}</p>

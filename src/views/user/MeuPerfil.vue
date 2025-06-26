@@ -417,7 +417,12 @@ interface SeguidosEstatisticas {
 
             <Separator orientation="vertical" class="mx-10 "/>
 
-            
+             <div class="flex flex-col items-center">
+                <p class="text-3xl mb-3" v-if="estatisticas.total_seguidores">{{ estatisticas.total_seguidores }}</p>
+                <p class="text-3xl mb-3" v-else>0</p>
+                <p class="text-gray-600">Seguidores</p>
+              </div>
+<!--             
              <Dialog>
                 <DialogTrigger as-child>
                   <div class="flex flex-col items-center" style="cursor: pointer;">
@@ -446,7 +451,7 @@ interface SeguidosEstatisticas {
                             </Avatar>
                       </div>
                       <div class=" col-span-3 flex justify-center flex-col" @click="goToPerfil(seguidor.usuario_id)" style="cursor: pointer;">
-                          <!-- <RouterLink :to="`http://localhost:5173/perfil/${seguidor.usuario_id}`">IR PRO PERFIL</RouterLink> -->
+                         
                            
                         <p class="text-[12px] font-bold">{{ seguidor.username }}</p>
                          <p>{{ seguidor.nome_completo }}</p>
@@ -459,7 +464,7 @@ interface SeguidosEstatisticas {
                  
                 </DialogContent>
               </Dialog>
-
+ -->
             <Separator orientation="vertical" class="ml-10"/>
 
              <div class="flex flex-col items-center">
@@ -566,7 +571,7 @@ interface SeguidosEstatisticas {
           <div class="w-full" >
 
             <Tabs default-value="seguindo" class="w-full mt-4">
-              <TabsList class="grid md:w-[200px] xs:w-[200px]  grid-cols-1 md:grid-cols-2 gap-2 border-none bg-transparent xs:grid-cols-2">
+              <TabsList class="grid w-[30%] grid-cols-2  gap-2 border-none bg-transparent">
                 <TabsTrigger value="seguidores" class="">
                   Seguidores
                 </TabsTrigger>
@@ -574,10 +579,10 @@ interface SeguidosEstatisticas {
                   Seguindo
                 </TabsTrigger>
               </TabsList>
-              <TabsContent value="seguidores" class="w-full lg:ml-[100px] sm:ml-[100px] md:ml-[100px] lg:mt-[-80px] sm:mt-[-80px] md:mt-[0px] sm:mt-1">
+              <TabsContent value="seguidores" class="w-full">
                 <div class="w-full  " >
 
-                  <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
+                  <div  class="grid grid-cols-4 gap-3 mt-6 mx-10">
                      <div
                         v-for="seguidor in seguidores_com_estats"
                         :key="seguidor.usuario_id"
@@ -619,10 +624,10 @@ interface SeguidosEstatisticas {
                 </div>
                 
               </TabsContent>
-             <TabsContent value="seguindo" class="w-full lg:ml-[100px] sm:ml-[100px] md:ml-[100px] lg:mt-[-80px] sm:mt-[-80px] md:mt-[0px] sm:mt-1">
+             <TabsContent value="seguindo" class="w-full ">
                 <div class="w-full  " >
 
-                 <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
+                 <div  class="grid grid-cols-4 gap-3 mt-6 mx-10">
                      <div
                         v-for="seguido in seguidos_com_estats"
                         :key="seguido.usuario_id"

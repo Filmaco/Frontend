@@ -1,10 +1,10 @@
 import { defineComponent, useSlots, computed, Fragment, cloneVNode, createElementBlock, openBlock, normalizeStyle, unref, renderList, createBlock, resolveDynamicComponent } from 'vue';
-import { u as useCollection } from '../Collection/Collection.js';
-import { M as MAP_KEY_TO_FOCUS_INTENT } from '../RovingFocus/utils.js';
-import { g as getNextMatch } from '../shared/useTypeahead.js';
 import { useVirtualizer } from '@tanstack/vue-virtual';
 import { useParentElement } from '@vueuse/core';
 import { refAutoReset } from '@vueuse/shared';
+import { u as useCollection } from '../Collection/Collection.js';
+import { M as MAP_KEY_TO_FOCUS_INTENT } from '../RovingFocus/utils.js';
+import { g as getNextMatch } from '../shared/useTypeahead.js';
 import { c as compare, q as queryCheckedElement } from './utils.js';
 import { g as getActiveElement } from '../shared/getActiveElement.js';
 import { i as injectListboxRootContext } from './ListboxRoot.js';

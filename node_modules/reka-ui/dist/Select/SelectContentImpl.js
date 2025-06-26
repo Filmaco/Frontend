@@ -1,7 +1,6 @@
 import { defineComponent, ref, watch, watchEffect, computed, createBlock, openBlock, unref, withCtx, createVNode, withModifiers, resolveDynamicComponent, mergeProps, renderSlot } from 'vue';
-import { _ as _sfc_main$2 } from '../DismissableLayer/DismissableLayer.js';
-import { f as focusFirst } from '../Menu/utils.js';
 import { unrefElement } from '@vueuse/core';
+import { f as focusFirst } from '../Menu/utils.js';
 import { _ as _sfc_main$4 } from './SelectItemAlignedPosition.js';
 import { _ as _sfc_main$3 } from './SelectPopperPosition.js';
 import { u as useCollection } from '../Collection/Collection.js';
@@ -13,6 +12,7 @@ import { u as useHideOthers } from '../shared/useHideOthers.js';
 import { u as useTypeahead } from '../shared/useTypeahead.js';
 import { u as useForwardProps } from '../shared/useForwardProps.js';
 import { _ as _sfc_main$1 } from '../FocusScope/FocusScope.js';
+import { _ as _sfc_main$2 } from '../DismissableLayer/DismissableLayer.js';
 import { i as injectSelectRootContext } from './SelectRoot.js';
 
 const SelectContentDefaultContextValue = {

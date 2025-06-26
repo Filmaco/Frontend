@@ -76,186 +76,59 @@ export default defineComponent({
       },
       enviando: false,
       tipos: [
-        { nome: "Documentário", id: "documentário" },
-        { nome: "Música", id: "clipe musical" },
-        { nome: "Filme", id: "longa-metragem" },
-        { nome: "Curta-metragem", id: "curta-metragem" },
-        { nome: "Vlog", id: "vlog" },
-        { nome: "Anime", id: "anime" },
-        { nome: "Série", id: "serie" },
-        { nome: "Gameplay", id: "gameplay" },
-        { nome: "Tutorial", id: "tutorial" },
-        { nome: "Review", id: "review" },
-        { nome: "Reação", id: "reacao" },
-        { nome: "Podcast", id: "podcast" },
-        { nome: "Entrevista", id: "entrevista" },
-        { nome: "Comédia", id: "comedia" },
-        { nome: "Notícia", id: "noticia" },
-        { nome: "Educacional", id: "educacional" },
-        { nome: "Ao vivo", id: "ao vivo" },
-        { nome: "Cobertura de Evento", id: "cobertura de evento" },
-        { nome: "Animação", id: "animacao" },
-        { nome: "Experiência Social", id: "experiencia social" },
-        { nome: "Unboxing", id: "unboxing" },
-        { nome: "Viagem", id: "viagem" },
-        { nome: "Lifestyle", id: "lifestyle" },
-        { nome: "Motivacional", id: "motivacional" },
-        { nome: "Paródia", id: "parodia" }
+        { nome: "Documentário", id: "documentario" },
+          { nome: "Música", id: "clipe musical" },
+          { nome: "Filme", id: "longa-metragem" },
+          { nome: "Curta-metragem", id: "curta-metragem" },
+          { nome: "Série", id: "serie" },
+          { nome: "Animação", id: "animacao" },
 
         ],
         generos: [
-        // Documentário
-        { nome: "Natureza", tipoId: "documentário" },
-        { nome: "História", tipoId: "documentário" },
-        { nome: "Biografia", tipoId: "documentário" },
-        { nome: "Científico", tipoId: "documentário" },
-        { nome: "Investigativo", tipoId: "documentário" },
-        { nome: "Cultural", tipoId: "documentário" },
+         // Documentário
+          { nome: "Natureza", tipoId: "documentario" },
+          { nome: "História", tipoId: "documentario" },
+          { nome: "Biografia", tipoId: "documentario" },
+          { nome: "Científico", tipoId: "documentario" },
+          { nome: "Investigativo", tipoId: "documentario" },
+          { nome: "Cultural", tipoId: "documentario" },
 
-        // Música
-        { nome: "Rock", tipoId: "clipe musical" },
-        { nome: "Pop", tipoId: "clipe musical" },
-        { nome: "Jazz", tipoId: "clipe musical" },
-        { nome: "Clássica", tipoId: "clipe musical" },
-        { nome: "Eletrônica", tipoId: "clipe musical" },
-        { nome: "Indie", tipoId: "clipe musical" },
-        { nome: "Reggae", tipoId: "clipe musical" },
+          // Música
+          { nome: "Rock", tipoId: "clipe musical" },
+          { nome: "Pop", tipoId: "clipe musical" },
+          { nome: "Jazz", tipoId: "clipe musical" },
+          { nome: "Clássica", tipoId: "clipe musical" },
+          { nome: "Eletrônica", tipoId: "clipe musical" },
+          { nome: "Indie", tipoId: "clipe musical" },
+          { nome: "Reggae", tipoId: "clipe musical" },
 
-        // Longa-metragem
-        { nome: "Ação", tipoId: "longa-metragem" },
-        { nome: "Comédia", tipoId: "longa-metragem" },
-        { nome: "Drama", tipoId: "longa-metragem" },
-        { nome: "Terror", tipoId: "longa-metragem" },
-        { nome: "Ficção Científica", tipoId: "longa-metragem" },
-        { nome: "Suspense", tipoId: "longa-metragem" },
-        { nome: "Romance", tipoId: "longa-metragem" },
-        { nome: "Aventura", tipoId: "longa-metragem" },
+          // Longa-metragem (Filme)
+          { nome: "Ação", tipoId: "longa-metragem" },
+          { nome: "Comédia", tipoId: "longa-metragem" },
+          { nome: "Drama", tipoId: "longa-metragem" },
+          { nome: "Terror", tipoId: "longa-metragem" },
+          { nome: "Ficção Científica", tipoId: "longa-metragem" },
+          { nome: "Suspense", tipoId: "longa-metragem" },
+          { nome: "Romance", tipoId: "longa-metragem" },
+          { nome: "Aventura", tipoId: "longa-metragem" },
 
-        // Curta-metragem
-        { nome: "Experimental", tipoId: "curta-metragem" },
-        { nome: "Drama", tipoId: "curta-metragem" },
-        { nome: "Animação", tipoId: "curta-metragem" },
-        { nome: "Social", tipoId: "curta-metragem" },
+          // Curta-metragem
+          { nome: "Experimental", tipoId: "curta-metragem" },
+          { nome: "Drama", tipoId: "curta-metragem" },
+          { nome: "Animação", tipoId: "curta-metragem" },
+          { nome: "Social", tipoId: "curta-metragem" },
 
-        // Vlog
-        { nome: "Dia a Dia", tipoId: "vlog" },
-        { nome: "Estudo", tipoId: "vlog" },
-        { nome: "Fitness", tipoId: "vlog" },
-        { nome: "Rotina", tipoId: "vlog" },
+          // Série
+          { nome: "Drama", tipoId: "serie" },
+          { nome: "Comédia", tipoId: "serie" },
+          { nome: "Suspense", tipoId: "serie" },
+          { nome: "Policial", tipoId: "serie" },
+          { nome: "Fantasia", tipoId: "serie" },
 
-        // Anime
-        { nome: "Shounen", tipoId: "anime" },
-        { nome: "Shoujo", tipoId: "anime" },
-        { nome: "Seinen", tipoId: "anime" },
-        { nome: "Isekai", tipoId: "anime" },
-        { nome: "Fantasia", tipoId: "anime" },
-
-        // Série
-        { nome: "Drama", tipoId: "serie" },
-        { nome: "Comédia", tipoId: "serie" },
-        { nome: "Suspense", tipoId: "serie" },
-        { nome: "Policial", tipoId: "serie" },
-        { nome: "Fantasia", tipoId: "serie" },
-
-        // Gameplay
-        { nome: "FPS", tipoId: "gameplay" },
-        { nome: "RPG", tipoId: "gameplay" },
-        { nome: "MOBA", tipoId: "gameplay" },
-        { nome: "Simulação", tipoId: "gameplay" },
-        { nome: "Terror", tipoId: "gameplay" },
-        { nome: "Aventura", tipoId: "gameplay" },
-        { nome: "Plataforma", tipoId: "gameplay" },
-        { nome: "Corrida", tipoId: "gameplay" },
-        { nome: "Esportes", tipoId: "gameplay" },
-        { nome: "Battle Royale", tipoId: "gameplay" },
-        { nome: "Survival", tipoId: "gameplay" },
-        { nome: "Stealth", tipoId: "gameplay" },
-        { nome: "Sandbox", tipoId: "gameplay" },
-        { nome: "Hack and Slash", tipoId: "gameplay" },
-        { nome: "Point and Click", tipoId: "gameplay" },
-        { nome: "Puzzle", tipoId: "gameplay" },
-        { nome: "Metroidvania", tipoId: "gameplay" },
-        { nome: "Idle / Incremental", tipoId: "gameplay" },
-        { nome: "Shoot 'em up", tipoId: "gameplay" },
-        { nome: "Fighting", tipoId: "gameplay" },
-        { nome: "Roguelike", tipoId: "gameplay" },
-        { nome: "Tycoon / Gestão", tipoId: "gameplay" },
-        { nome: "Visual Novel", tipoId: "gameplay" },
-
-        // Tutorial
-        { nome: "Tecnologia", tipoId: "tutorial" },
-        { nome: "Culinária", tipoId: "tutorial" },
-        { nome: "Artesanato", tipoId: "tutorial" },
-        { nome: "Beleza", tipoId: "tutorial" },
-
-        // Review
-        { nome: "Produtos", tipoId: "review" },
-        { nome: "Filmes", tipoId: "review" },
-        { nome: "Jogos", tipoId: "review" },
-
-        // Reação
-        { nome: "Música", tipoId: "reacao" },
-        { nome: "Vídeos virais", tipoId: "reacao" },
-
-        // Podcast
-        { nome: "Entrevista", tipoId: "podcast" },
-        { nome: "Opinião", tipoId: "podcast" },
-        { nome: "Cultura pop", tipoId: "podcast" },
-
-        // Entrevista
-        { nome: "Profissionais", tipoId: "entrevista" },
-        { nome: "Público", tipoId: "entrevista" },
-
-        // Comédia
-        { nome: "Stand-up", tipoId: "comedia" },
-        { nome: "Sketche", tipoId: "comedia" },
-
-        // Notícia
-        { nome: "Atualidades", tipoId: "noticia" },
-        { nome: "Tecnologia", tipoId: "noticia" },
-
-        // Educacional
-        { nome: "Matemática", tipoId: "educacional" },
-        { nome: "História", tipoId: "educacional" },
-        { nome: "Ciências", tipoId: "educacional" },
-
-        // Ao vivo
-        { nome: "Gameplay", tipoId: "ao vivo" },
-        { nome: "Bate-papo", tipoId: "ao vivo" },
-
-        // Cobertura de evento
-        { nome: "Show", tipoId: "cobertura de evento" },
-        { nome: "Feira", tipoId: "cobertura de evento" },
-        { nome: "Lançamento", tipoId: "cobertura de evento" },
-
-        // Animação
-        { nome: "Curta", tipoId: "animacao" },
-        { nome: "3D", tipoId: "animacao" },
-        { nome: "2D", tipoId: "animacao" },
-
-        // Experiência social
-        { nome: "Interações", tipoId: "experiencia social" },
-        { nome: "Psicológicas", tipoId: "experiencia social" },
-
-        // Unboxing
-        { nome: "Tecnologia", tipoId: "unboxing" },
-        { nome: "Brinquedos", tipoId: "unboxing" },
-
-        // Viagem
-        { nome: "Internacional", tipoId: "viagem" },
-        { nome: "Nacional", tipoId: "viagem" },
-
-        // Lifestyle
-        { nome: "Beleza", tipoId: "lifestyle" },
-        { nome: "Rotina", tipoId: "lifestyle" },
-
-        // Motivacional
-        { nome: "Desenvolvimento pessoal", tipoId: "motivacional" },
-        { nome: "Autoajuda", tipoId: "motivacional" },
-
-        // Paródia
-        { nome: "Música", tipoId: "parodia" },
-        { nome: "Filmes", tipoId: "parodia" }
+          // Animação
+          { nome: "Curta", tipoId: "animacao" },
+          { nome: "3D", tipoId: "animacao" },
+          { nome: "2D", tipoId: "animacao" },
       ],
       duration: ''
     }

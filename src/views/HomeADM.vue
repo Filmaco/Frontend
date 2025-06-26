@@ -13,19 +13,47 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import router from '@/routes';
 import { UserService } from '@/services/user.service';
+import ApexCharts from 'apexcharts';
+import EstatisticaService from '@/services/estatistica.service';
+import { number } from 'zod';
 
-interface Video {
-  id: number;
-  usuario_id: number;
-  nome: string;
-  visualizacoes: number;
-  imagem: string | null;
-  tags: []
-  nome_usuario: string
+interface Estatisticas {
+  usuarios: {
+    total: string,
+    ativos: number;
+    inativos: number;
+    bloqueados: number;
+  };
+  videos: {
+    total: number;
+    por_status: {
+      ativo: number;
+      inativo: number;
+      bloqueado: number;
+      investigando: number;
+    };
+  };
+  interacoes: {
+    comentarios: number;
+    avaliacoes: number;
+  };
+  playlists: {
+    total: number;
+    // por_usuario: number;
+  };
+  videos_populares: Videos[];
+  media_visualizacoes: number;
+  comentarios_por_data: { data: string; total: number }[];
+  avaliacoes_por_data: { data: string; total: number }[];
 }
 
-interface Tag {
-  nome_tag: string;
+
+interface Videos {
+  video_id: number,
+  nome: string,
+  visualizacoes: number,
+  comentarios: 0,
+  curtidas: 0,
 }
 
 export default defineComponent({
@@ -39,105 +67,249 @@ export default defineComponent({
     CardContent,
     Avatar,
     AvatarFallback,
-    AvatarImage
+    AvatarImage,
+    ApexCharts,
   },
-  data() {
+   data() {
     return {
-      tags: [] as Tag[],
-      videosByTag: [] as Video[],
-      tagSelecionada: null as string | null,
-      tipo: ''
-    };
+      estatisticas: {
+         usuarios: {
+          total: 0,
+          ativos: 0,
+          inativos: 0,
+          bloqueados: 0,
+        },
+        videos: {
+          total: 0,
+          por_status: {
+            ativo: 0,
+            inativo: 0,
+            bloqueado: 0,
+            investigando: 0,
+          },
+        },
+        interacoes: {
+          comentarios: 0,
+          avaliacoes: 0,
+        },
+        playlists: {
+          total: 0,
+          // por_usuario: 0,
+        },
+        videos_populares: [], 
+        media_visualizacoes: 0,
+        comentarios_por_data: [],
+        avaliacoes_por_data: [],
+      },
+      chartOptions: {
+        chart: {
+          id: 'grafico-visualizacoes'
+        },
+        xaxis: {
+          categories: ['Janeiro', 'Fevereiro', 'Março']
+        },
+        title: {
+          text: 'Visualizações por Mês'
+        }
+      },
+      series: [
+        {
+          name: 'Visualizações',
+          data: [150, 200, 300]
+        }
+      ],
+      chartUsuarios: {
+        chart: {
+          type: 'bar',
+          height: 350
+        },
+        plotOptions: {
+          bar: {
+            columnWidth: '45%',
+            distributed: true
+          }
+        },
+        colors: ['#28b463', '#2874a6', '#FF4560'], 
+        dataLabels: {
+          enabled: false
+        },
+        legend: {
+          show: false
+        },
+        xaxis: {
+          categories: ['Ativos', 'Inativos', 'Bloqueados'],
+          labels: {
+            style: {
+              colors: ['#28b463', '#2874a6', '#FF4560'],
+              fontSize: '14px'
+            }
+          }
+        },
+        title: {
+          text: 'Usuários por Status',
+          align: 'center'
+        }
+      },
+      seriesUsuarios: [{ name: 'Usuários', data: [0, 0, 0] }],
+
+      chartVideosStatus: {
+        chart: { type: 'donut' },
+        labels: ['Ativo', 'Inativo', 'Bloqueado', 'Investigando'],
+        title: { text: 'Vídeos por Status' }
+      },
+      seriesVideosStatus: [0, 0, 0, 0],
+     chartInteracoes: {
+        chart: {
+          type: 'area'
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          curve: 'smooth'
+        },
+        xaxis: {
+          type: 'category',
+          categories: [] as string[]
+        },
+        title: {
+          text: 'Comentários e Avaliações por Data'
+        },
+        tooltip: {
+          x: {
+            format: 'dd/MM/yyyy'
+          }
+        }
+      },
+      seriesInteracoes: [
+        { name: 'Comentários', data: [] as number[] },
+        { name: 'Avaliações', data: [] as number[] }
+      ],
+
+      chartPopulares: {
+        chart: { type: 'bar' },
+        xaxis: { categories: [] as string[]},
+        title: { text: 'Top 10 Vídeos Mais Populares' },
+        tooltip: {} as any
+      },
+      seriesPopulares: [{
+        name: 'Visualizações',
+        data: [] as {
+          x: string,
+          y: number,
+          curtidas: number,
+          comentarios: number
+        }[]
+      }]
+
+
+    }
   },
   async mounted() {
-    await this.getTags();
-    this.videosByTag = await this.getVideosByTag(this.tagSelecionada);
-    console.log('mounted: ',this.videosByTag);
-
-    UserService.perfil()
-    .then((response) => {
-        console.log('perfil',response.usuario.tipo);
-        this.tipo = response.usuario.tipo;
-        
-        
-    })
-    .catch((error) => console.log(error)
-    )
+    this.loadItems()
+    console.log(this.estatisticas);
     
   },
   methods: {
-    async getTags() {
+    async loadItems() {
       try {
-        const response = await TagService.listarTags();
-        const todasTags = response.data.map((item: any) => item.nome_tag);
+        const response = await EstatisticaService.estatisticasAdmin()
+         this.estatisticas = {
+            usuarios: {
+              total: response.estatisticas.usuarios.total,
+              ativos: response.estatisticas.usuarios.ativos,
+              inativos: response.estatisticas.usuarios.inativos,
+              bloqueados: response.estatisticas.usuarios.bloqueados
+            },
+            videos: {
+              total: response.estatisticas.videos.total,
+              por_status: {
+                ativo: response.estatisticas.videos.por_status.ativo || 0,
+                inativo: response.estatisticas.videos.por_status.inativo || 0,
+                bloqueado: response.estatisticas.videos.por_status.bloqueado || 0,
+                investigando: response.estatisticas.videos.por_status.investigando || 0
+              }
+            },
+            interacoes: {
+              comentarios: response.estatisticas.interacoes.comentarios,
+              avaliacoes: response.estatisticas.interacoes.avaliacoes
+            },
+             playlists: {
+              total: response.estatisticas.playlist.total,
+              // por_usuario: response.estatisticas.playlists.por_usuario || 0,
+            },
+            videos_populares: response.estatisticas.videos_populares,
+            media_visualizacoes: response.estatisticas.media_visualizacoes,
+            comentarios_por_data: response.estatisticas.comentarios_por_data,
+            avaliacoes_por_data: response.estatisticas.avaliacoes_por_data
+          }
 
-        const unicas = [...new Set(todasTags)] as string[];
-        this.tags = unicas.map((nome: string) => ({ nome_tag: nome }));
+        this.seriesUsuarios = [
+          { name: 'Usuários', data: [this.estatisticas.usuarios.ativos, this.estatisticas.usuarios.inativos] }
+        ];
+
+        this.seriesVideosStatus = [
+          this.estatisticas.videos.por_status.ativo,
+          this.estatisticas.videos.por_status.inativo,
+          this.estatisticas.videos.por_status.bloqueado,
+          this.estatisticas.videos.por_status.investigando
+        ];
+
+        const datas = this.estatisticas.comentarios_por_data.map((item: any) => item.data)
+
+        this.chartInteracoes.xaxis.categories = datas
+
+        this.seriesInteracoes = [
+          {
+            name: 'Comentários',
+            data: this.estatisticas.comentarios_por_data.map((item: any) => item.total)
+          },
+          {
+            name: 'Avaliações',
+            data: this.estatisticas.avaliacoes_por_data.map((item: any) => item.total)
+          }
+        ]
+
+       this.seriesPopulares = [
+          {
+            name: 'Visualizações',
+            data: this.estatisticas.videos_populares.map((v: any) => ({
+              x: v.nome,
+              y: v.visualizacoes,
+              curtidas: v.curtidas,
+              comentarios: v.comentarios
+            }))
+          }
+        ]
+
+        this.chartPopulares = {
+          chart: { type: 'bar' },
+          title: { text: 'Top 10 Vídeos Mais Populares' },
+          tooltip: {
+            custom: function({ series, seriesIndex, dataPointIndex, w }) {
+              const data = w.config.series[seriesIndex].data[dataPointIndex];
+              return `
+                <div class="px-2 py-1">
+                  <strong>${data.x}</strong><br>
+                  Visualizações: ${data.y}<br>
+                  Curtidas: ${data.curtidas}<br>
+                  Comentários: ${data.comentarios}
+                </div>
+              `;
+            }
+          },
+          xaxis: {
+            categories: this.estatisticas.videos_populares.map((v: any) => v.nome)
+          }
+        }
 
 
-      } catch (error) {
-        console.error(error);
+
+
+        return this.estatisticas;
       }
-    },
-
-    async selecionarTag(nome: string | null) {
-      this.tagSelecionada = nome;
-      await this.getVideosByTag(nome);
-    },
-      async getVideosByTag(tagName: string | null) {
-    try {
-      if (!tagName) {
-
-        const response = await VideoService.listarVideos()
-        const data = await response.data.map((item:any) => ({
-            id: item.video_id,
-            usuario_id: item.usuario_id,
-            nome: item.nome,
-            imagem: item.imagem,
-            visualizacoes: item.visualizacoes,
-            nome_usuario: item.nome_usuario,
-           
-        }))
-        
-        return data;
-      } else {
-        const response = await TagService.listarVideosPorTags(tagName);
-        this.videosByTag = response.data.map((item: any) => ({
-          id: item.id,
-          nome: item.nome,
-          descricao: item.descricao,
-          link: item.link,
-          imagem: item.imagem,
-          visualizacoes: item.visualizacoes,
-          tags: item.tags,
-          nome_usuario: item.nome_usuario
-        }));
-        console.log('data: ',this.videosByTag);
-
-      }
-    } catch (error) {
-      console.error('Erro ao buscar vídeos:', error);
+      catch(error) { console.log(error) }
     }
-  },
-
-  async goToPageVideWithId(id:number) {
-    router.push({ name: 'Video.Visualizar', params: { id } })
-  },
-   async goToPerfilWithId(nome:string) {
-    try {
-      const response = await UserService.getUserByName(nome);
-      const id = response.usuario_id
-      console.log("id: ",id , " - ", response);
-      router.push({ name: 'Usuario.Perfil', params: { id } })
-    }
-    catch (e) {
-      console.log('EEROR: ',e);
-      
-    }
-    //router.push({ name: 'Usuario.Perfil', params: { id } })
-  }
-
-
   },
 
 });
@@ -146,33 +318,67 @@ export default defineComponent({
 
 
 <template>
-  <div class="p-10">
-    ADM
+   <div class="w-full p-8 grid grid-rows-5 gap-4">
+      <div class="w-full grid grid-cols-4 gap-2">
+        <div class="bg-blue-100 border rounded-md flex flex-col grid grid-rows-3 items-center p-4">
+          <div class="bg-red-300 rows-span-2 grid grid-cols-2 flex flex-between">
+            <div>a</div>
+            <!-- <p >{{ estatisticas }}</p> -->
+             <div>
+              <p> {{ estatisticas.usuarios.total }} </p>
+             </div>
+          </div>
+          <div class="bg-blue-300">
+            Total de Usuarios
+          </div>
+        </div>
+
+        <div class="bg-green-100 border rounded-md flex flex-col grid grid-rows-3 items-center p-4">
+          <div class="bg-red-300 rows-span-2 grid grid-cols-2 flex flex-between">
+            <div>a</div>
+            <div >{{ estatisticas.videos.total }}</div>
+          </div>
+          <div class="bg-blue-300">
+            Total de Videos
+          </div>
+        </div>  
+
+        <div class="bg-purple-100 border rounded-md flex flex-col grid grid-rows-3 items-center p-4">
+          <div class="bg-red-300 rows-span-2 grid grid-cols-2 flex flex-between">
+            <div>a</div>
+            <div >{{ estatisticas.playlists.total }}</div>
+          </div>
+          <div class="bg-blue-300">
+            Total de Playlists
+          </div>
+        </div>
+
+        <div class="bg-red-100 border rounded-md flex flex-col grid grid-rows-3 items-center p-4">
+          
+        </div>
+      </div>
+      <div class="w-full row-span-4 grid grid-row-2 gap-3">
+          <div class="gap-2 grid grid-cols-5">
+              <div class="border rounded-md p-2 col-span-2">
+                <ApexChart type="bar" height="350" :options="chartUsuarios" :series="seriesUsuarios" />
+              </div>
+              <div class="border rounded-md p-2 col-span-3">
+                <ApexChart type="donut" height="350" :options="chartVideosStatus" :series="seriesVideosStatus" />
+              </div>
+          </div>
+          <div class=" grid grid-cols-5 gap-2">
+            <div class="border rounded-md p-2 col-span-3">
+              <ApexChart type="area" height="350" :options="chartInteracoes" :series="seriesInteracoes" />
+            </div>
+            <div class="border rounded-md p-2 col-span-2">
+              <ApexChart type="bar" height="350" :options="chartPopulares" :series="seriesPopulares" />
+            </div>
+          </div>
+      </div>
   </div>
 </template>
 
 
 <style scoped>
-.selecionada {
-  background-color: #000;
-  color: white;
-  border-color: #0f5132;
-}
-@media (min-width: 1024px) {
-  header {
-    display: flex;
-    place-items: center;
-    padding-right: calc(var(--section-gap) / 2);
-  }
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
-  header .wrapper {
-    display: flex;
-    place-items: flex-start;
-    flex-wrap: wrap;
-  }
-}
 </style>

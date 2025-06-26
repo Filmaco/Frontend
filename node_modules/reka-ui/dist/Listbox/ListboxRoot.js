@@ -1,6 +1,6 @@
 import { defineComponent, toRefs, ref, watch, nextTick, createBlock, openBlock, unref, withCtx, renderSlot, createCommentVNode } from 'vue';
-import { u as useCollection } from '../Collection/Collection.js';
 import { useVModel, createEventHook } from '@vueuse/core';
+import { u as useCollection } from '../Collection/Collection.js';
 import { c as compare } from './utils.js';
 import { g as getFocusIntent } from '../RovingFocus/utils.js';
 import '@floating-ui/vue';

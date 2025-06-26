@@ -51,6 +51,9 @@ async function logout() {
 
 }
 
+console.log(props.user);
+
+
  async function goToPerfil(id:number) {
   
     router.push({ name: 'Usuario.Meu.Perfil'})
@@ -68,10 +71,10 @@ async function logout() {
             class="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground bg-red-300 h-8 w-8 flex justify-center" style="border-radius: 50px;"
           >
             <Avatar class="h-8 w-8 rounded-lg" style="border-radius: 50px;">
-              <AvatarImage :src="user.avatar" :alt="user.nome_completo" />
-              <AvatarFallback class="rounded-lg">
+              <AvatarImage :src="`http://localhost:8000/uploads/${user.avatar}`" :alt="user.nome_completo" />
+              <!-- <AvatarFallback class="rounded-lg">
                 CN
-              </AvatarFallback>
+              </AvatarFallback> -->
             </Avatar>
            
           </SidebarMenuButton>
@@ -85,7 +88,7 @@ async function logout() {
           <DropdownMenuLabel class="p-0 font-normal">
             <div class="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
               <Avatar class="h-8 w-8 rounded-lg">
-                <AvatarImage :src="user.avatar" :alt="user.nome_completo" />
+                <AvatarImage :src="`http://localhost:8000/uploads/${user.avatar}`" :alt="user.nome_completo" />
                 <AvatarFallback class="rounded-lg">
                   CN
                 </AvatarFallback>
@@ -104,10 +107,7 @@ async function logout() {
               <User />
               Perfil
             </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Bell />
-              Notifications
-            </DropdownMenuItem>
+           
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem  @click="logout">
