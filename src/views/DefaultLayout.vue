@@ -260,7 +260,11 @@ export default {
           { nome: "2D", tipoId: "animacao" },
 
       ],
-      duration: ''
+      duration: '',
+      error:{
+        error:false,
+        message: ''
+      }
     }
   },
   mounted() { 
@@ -337,6 +341,8 @@ export default {
 
         if (!imagem) {
           this.exibirTooltip("Imagem não selecionada.")
+          this.error.error = true 
+          this.error.message = 'Tamanho de arquivo não suportado'
           return false;
         }
 
@@ -580,7 +586,7 @@ export default {
                           @change="(e: any) => video.imagem = e.target.files[0]" required />
                         </label>
                       </div>
-
+                      <div v-if="error.error" class="ml-3 text-red-500">{{ error.message }}</div>
                       <div class="w-full flex justify-between mt-16 mx-2">
                          <AlertDialogCancel class=" bg-black hover:bg-[#513188] w-[20%]" style="border-radius: 30px;">
                            <Button class="w-full h-full">Cancelar</Button>

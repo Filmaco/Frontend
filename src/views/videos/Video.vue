@@ -250,6 +250,10 @@ export default defineComponent({
         video_id: 0
       },
       seguidores: 0,
+      alert: {
+        alert: false,
+        message: ''
+      }
     };
   },
 
@@ -397,6 +401,8 @@ export default defineComponent({
 
       } catch (error) {
         console.error('Erro ao adicionar vídeo à nova playlist:', error);
+        //alert('epa')
+        this.alert.alert = true
       }
     },
 
@@ -589,11 +595,11 @@ export default defineComponent({
         };
         this.activeIcon = mapNumeroParaTipo[valor];
 
-        alert("Avaliação adicionada");
+        // alert("Avaliação adicionada");
         return response; // ← retorno agora é necessário
       } catch (error) {
         console.error(error);
-        alert("Erro ao adicionar avaliação");
+        // alert("Erro ao adicionar avaliação");
         throw error;
       }
     },
@@ -602,10 +608,10 @@ export default defineComponent({
 
       try {
         await AvaliacaoService.editarAvaliacao(id, valor);
-        alert("Avaliação atualizada");
+        // alert("Avaliação atualizada");
       } catch (error) {
         console.error(error);
-        alert("Erro ao editar avaliação");
+        // alert("Erro ao editar avaliação");
       }
     },
 
@@ -642,7 +648,7 @@ export default defineComponent({
     },
 
     async denunciarVideo(motivo) {
-      alert(`video ${this.data.video.video_id} denunciado`)
+      // alert(`video ${this.data.video.video_id} denunciado`)
       try {
         this.denuncia.usuario_id = this.data.usuario_id;
         this.denuncia.video_id = this.id;
@@ -653,7 +659,7 @@ export default defineComponent({
       }
       catch(error) {
         console.log(error);
-        alert(`opa, nao denunciado`)
+        // alert(`opa, nao denunciado`)
       }
     },
 
@@ -825,12 +831,16 @@ export default defineComponent({
                                       class="hidden"
                                       @change="handleFileChange"
                                     />
+                                  
                                 </label>
                               </div>
                               <div class="pb-3">
                                 <Label>Título</Label>
                                 <Input v-model="data.playlist.titulo" placeholder="Título da Playlist" />
                               </div>
+                                <div>
+                                      <p v-if="alert.alert" class="text-red-500 mb-2">Todos os campos devem ser preenchidos</p>
+                                    </div>
 
                               <div class="flex justify-end">
                                 <Button @click="closeDialog" class="mr-2">Cancelar</Button>
@@ -1177,7 +1187,9 @@ export default defineComponent({
 
   </div>
   </div>
-  
+  <div v-if="alert.alert" class="bg-white w-[600px] h-[100px] fixed bottom-1 right-1 zindex-[100000]">
+    opa
+  </div>
 </template>
 
 <style scoped>

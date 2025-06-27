@@ -85,7 +85,7 @@ export default defineComponent({
 
 <template>
   <div class="w-full p-3">
-    <p>minhas playlist</p>
+    <p class="text-2xl ml-4">Minhas playlist</p>
     <div  class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mx-10">
       <div
         v-for="playlist in data"

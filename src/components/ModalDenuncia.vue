@@ -73,7 +73,7 @@ export default defineComponent({
     async aceitarDenuncia() {
       try {
         const response = await DenunciaService.alterarStatusVideoBloqueado(this.denuncia.video_id)
-        alert('video bloqueado')
+        // alert('video bloqueado')
         window.location.reload()
         return response;
       }catch(error) { console.log(error) }
@@ -83,7 +83,7 @@ export default defineComponent({
       try {
         const response = await DenunciaService.alterarStatusVideoAtivo(this.denuncia.video_id)
         window.location.reload()
-        alert('video ativo')
+        // alert('video ativo')
         return response;
       }catch(error) { console.log(error) }
     }

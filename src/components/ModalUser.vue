@@ -12,6 +12,7 @@ import {
   TabsTrigger,
 } from '@/components/ui/tabs'
 import { Eye, EyeClosed } from 'lucide-vue-next'
+import EstatisticaService from '@/services/estatistica.service'
 
 export default defineComponent({
   name: 'ModalUser',
@@ -67,11 +68,17 @@ export default defineComponent({
             senha: ''
         },
         submit: false,
+        estatisticas: {
+            total_seguidores: '',
+            total_seguidos: '',
+            total_videos: ''
+        }
     }
   },
   mounted() {
     if (this.user?.id) {
         this.fetchUserById(this.user.id)
+        this.loadEstatisticas(this.user.id)
     }
   },
   methods: {
@@ -144,6 +151,18 @@ export default defineComponent({
         this.mostrar_confirmar_senha = !this.mostrar_confirmar_senha;
     },
 
+    async loadEstatisticas(id:any) {
+        try {
+            const response = await EstatisticaService.estatisticasPorUsuario(id)
+
+            this.estatisticas = {
+               total_videos: response.estatisticas.total_videos,
+                total_seguidores: response.estatisticas.total_seguidores,
+                total_seguidos: response.estatisticas.total_seguidos
+            }
+        }
+        catch(error) { console.log(error) }
+    }
 
   }
 })
@@ -188,6 +207,9 @@ export default defineComponent({
                             <div>
                                 <Label class="text-xl">{{ usuario.nome_completo }}</Label>
                             </div>
+                            <div>
+                                <Label >{{ usuario.email }}</Label>
+                            </div>
                             <div class="grid grid-cols-2 mt-3">
                                 <div class="flex">
                                     <Label class="pr-2">Nivel:</Label>
@@ -210,15 +232,15 @@ export default defineComponent({
                             
                             <div class="mr-5">
                                 <Label>Seguidores</Label>
-                                <p class="">100</p>
+                                <p class="">{{ estatisticas.total_seguidores }}</p>
                             </div>
                             <div class="mr-5">
                                 <Label>Seguindo</Label>
-                                <p class="">100</p>
+                                <p class="">{{ estatisticas.total_seguidos }}</p>
                             </div>
                             <div>
                                 <Label>Videos</Label>
-                                <p class="">100</p>
+                                <p class="">{{ estatisticas.total_videos }}</p>
                             </div>
                         </div>
                         

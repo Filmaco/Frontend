@@ -190,7 +190,7 @@ const data = {
       </SidebarHeader>
       <SidebarContent class="h-full flex justify-between pb-10">
         <NavProjects :projects="data.projects" />
-        <NavUserSidebar :user="user" />
+        <NavUserSidebar v-if="user.usuario_id" :user="user" />
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

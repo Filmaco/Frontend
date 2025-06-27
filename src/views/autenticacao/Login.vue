@@ -20,13 +20,13 @@ export default {
     return {
       usuario: {
         //Admin
-        email: 'laratrabalhos83@gmail.com',
+        email: '',
         //user padrao 
         // email: 'tilara.cloud@gmail.com',
-        senha: 'ADM1234@',
+        senha: '',
         // senha: 'Senha@123'
       },
-      confirmar_senha: '',
+      // confirmar_senha: '',
       erros: {},
       submit: false,
       mensagem: false,
@@ -39,7 +39,7 @@ export default {
 
       if (!this.usuario.email) this.erros.email = 'Email é obrigatório'
       if (!this.usuario.senha) this.erros.senha = 'Senha é obrigatória'
-      if (!this.confirmar_senha) this.erros.confirmar_senha = 'Confirmação de senha é obrigatória'
+      // if (!this.confirmar_senha) this.erros.confirmar_senha = 'Confirmação de senha é obrigatória'
 
       return true
     },

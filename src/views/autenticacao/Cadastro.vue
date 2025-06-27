@@ -39,17 +39,17 @@ export default {
   data() {
     return {
       usuario: {
-        nome_completo: 'Felix',
-        username: 'felix',
-        email: 'felix@gmail.com',
-        senha: '123@Senha',
-        data_nascimento: '2005-08-18',
+        nome_completo: '',
+        username: '',
+        email: '',
+        senha: '',
+        data_nascimento: '',
         foto_perfil: null as File | null,
-        genero: 'masculino',
-        biografia: 'Gato',
+        genero: '',
+        biografia: '',
         tipo: 'comum'
       },
-      confirmar_senha: '123@Senha',
+      confirmar_senha: '',
       erros: {
         nome_completo: '',
         username: '',

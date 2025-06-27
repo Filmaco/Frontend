@@ -166,6 +166,16 @@ export default defineComponent({
             <input type="text" v-model="filtros.nome" class="border rounded px-2 py-1 w-full" placeholder="Buscar por nome..." />
           </div>
 
+           <div>
+            <h3 class="font-bold mb-3">Tipo</h3>
+            <div v-for="tipo in filtros_data.tipos" :key="id" class="mb-1">
+              <label class="flex items-center space-x-2">
+                <input type="checkbox" :value="tipo.id" v-model="filtros.tipos" />
+                <span>{{ tipo.nome }}</span>
+              </label>
+            </div>
+          </div>
+
           <div class="mb-3">
             <h3 class="font-bold mb-2">Gênero</h3>
             <div v-for="genero in filtros_data.generos" :key="genero.id" class="mb-1">
@@ -176,15 +186,7 @@ export default defineComponent({
             </div>
           </div>
   
-          <div>
-            <h3 class="font-bold mb-3">Tipo</h3>
-            <div v-for="tipo in filtros_data.tipos" :key="id" class="mb-1">
-              <label class="flex items-center space-x-2">
-                <input type="checkbox" :value="tipo.id" v-model="filtros.tipos" />
-                <span>{{ tipo.nome }}</span>
-              </label>
-            </div>
-          </div>
+         
 
           <!-- <div>
             <h3 class="font-bold mb-2 mt-4">Duração</h3>

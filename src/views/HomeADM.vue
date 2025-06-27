@@ -100,6 +100,11 @@ export default defineComponent({
         media_visualizacoes: 0,
         comentarios_por_data: [],
         avaliacoes_por_data: [],
+        media_videos_por_usuario: 0,
+        media_visualizacoes_por_usuario: 0,
+        media_comentarios_por_usuario: 0,
+        // total_visualizacoes: 0,
+        // total_comentarios: 0
       },
       chartOptions: {
         chart: {
@@ -158,33 +163,34 @@ export default defineComponent({
         title: { text: 'Vídeos por Status' }
       },
       seriesVideosStatus: [0, 0, 0, 0],
-     chartInteracoes: {
-        chart: {
-          type: 'area'
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          curve: 'smooth'
-        },
-        xaxis: {
-          type: 'category',
-          categories: [] as string[]
-        },
-        title: {
-          text: 'Comentários e Avaliações por Data'
-        },
-        tooltip: {
-          x: {
-            format: 'dd/MM/yyyy'
+     
+      chartInteracoes: {
+          chart: {
+            type: 'area'
+          },
+          dataLabels: {
+            enabled: false
+          },
+          stroke: {
+            curve: 'smooth'
+          },
+          xaxis: {
+            type: 'category',
+            categories: [] as string[]
+          },
+          title: {
+            text: 'Comentários e Avaliações por Data'
+          },
+          tooltip: {
+            x: {
+              format: 'dd/MM/yyyy'
+            }
           }
-        }
-      },
-      seriesInteracoes: [
-        { name: 'Comentários', data: [] as number[] },
-        { name: 'Avaliações', data: [] as number[] }
-      ],
+        },
+        seriesInteracoes: [
+          { name: 'Comentários', data: [] as number[] },
+          { name: 'Avaliações', data: [] as number[] }
+        ],
 
       chartPopulares: {
         chart: { type: 'bar' },
@@ -200,7 +206,77 @@ export default defineComponent({
           curtidas: number,
           comentarios: number
         }[]
-      }]
+      }],
+
+   chartMediasPorUsuario: {
+      chart: {
+        height: 350,
+        type: 'bar'
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 10,
+          dataLabels: {
+            position: 'top'
+          }
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: function (val: number) {
+          return val.toFixed(1);
+        },
+        offsetY: -20,
+        style: {
+          fontSize: '12px',
+          colors: ['#304758']
+        }
+      },
+      xaxis: {
+        categories: ['Vídeos por Usuário', 'Visualizações por Usuário', 'Comentários por Usuário'],
+        position: 'top',
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        crosshairs: {
+          fill: {
+            type: 'gradient',
+            gradient: {
+              colorFrom: '#D8E3F0',
+              colorTo: '#BED1E6',
+              stops: [0, 100],
+              opacityFrom: 0.4,
+              opacityTo: 0.5
+            }
+          }
+        },
+        tooltip: { enabled: true }
+      },
+      yaxis: {
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        labels: {
+          show: false,
+          formatter: function (val: number) {
+            return val.toFixed(1);
+          }
+        }
+      },
+      title: {
+        text: 'Médias por Usuário',
+        floating: true,
+        offsetY: 330,
+        align: 'center',
+        style: {
+          color: '#444'
+        }
+      }
+    },
+    seriesMediasPorUsuario: [{
+      name: 'Média',
+      data: [] as number[]
+    }],
+
+
 
 
     }
@@ -241,7 +317,17 @@ export default defineComponent({
             videos_populares: response.estatisticas.videos_populares,
             media_visualizacoes: response.estatisticas.media_visualizacoes,
             comentarios_por_data: response.estatisticas.comentarios_por_data,
-            avaliacoes_por_data: response.estatisticas.avaliacoes_por_data
+            avaliacoes_por_data: response.estatisticas.avaliacoes_por_data,
+            
+            media_videos_por_usuario: response.estatisticas.medias_por_usuario.videos,
+
+            media_visualizacoes_por_usuario: response.estatisticas.medias_por_usuario.visualizacoes,
+
+            media_comentarios_por_usuario: response.estatisticas.medias_por_usuario.comentarios,
+
+            // total_visualizacoes: response.estatisticas.medias_por_usuario.,
+
+            // total_comentarios: number
           }
 
         this.seriesUsuarios = [
@@ -303,7 +389,14 @@ export default defineComponent({
           }
         }
 
-
+        this.seriesMediasPorUsuario = [{
+          name: 'Média',
+          data: [
+            response.estatisticas.medias_por_usuario.comentarios,
+            response.estatisticas.medias_por_usuario.videos,
+            response.estatisticas.medias_por_usuario.visualizacoes
+          ]
+        }]
 
 
         return this.estatisticas;
@@ -321,40 +414,40 @@ export default defineComponent({
    <div class="w-full p-8 grid grid-rows-5 gap-4">
       <div class="w-full grid grid-cols-4 gap-2">
         <div class="bg-blue-100 border rounded-md flex flex-col grid grid-rows-3 items-center p-4">
-          <div class="bg-red-300 rows-span-2 grid grid-cols-2 flex flex-between">
+          <div class=" rows-span-2 grid grid-cols-2 flex flex-between">
             <div>a</div>
             <!-- <p >{{ estatisticas }}</p> -->
              <div>
-              <p> {{ estatisticas.usuarios.total }} </p>
+              <p class="text-3xl"> {{ estatisticas.usuarios.total }} </p>
              </div>
           </div>
-          <div class="bg-blue-300">
+          <div class="">
             Total de Usuarios
           </div>
         </div>
 
         <div class="bg-green-100 border rounded-md flex flex-col grid grid-rows-3 items-center p-4">
-          <div class="bg-red-300 rows-span-2 grid grid-cols-2 flex flex-between">
+          <div class=" rows-span-2 grid grid-cols-2 flex flex-between">
             <div>a</div>
-            <div >{{ estatisticas.videos.total }}</div>
+            <div class="text-3xl">{{ estatisticas.videos.total }}</div>
           </div>
-          <div class="bg-blue-300">
+          <div class="">
             Total de Videos
           </div>
         </div>  
 
         <div class="bg-purple-100 border rounded-md flex flex-col grid grid-rows-3 items-center p-4">
-          <div class="bg-red-300 rows-span-2 grid grid-cols-2 flex flex-between">
+          <div class=" rows-span-2 grid grid-cols-2 flex flex-between">
             <div>a</div>
-            <div >{{ estatisticas.playlists.total }}</div>
+            <div class="text-3xl">{{ estatisticas.playlists.total }}</div>
           </div>
-          <div class="bg-blue-300">
+          <div class="">
             Total de Playlists
           </div>
         </div>
 
-        <div class="bg-red-100 border rounded-md flex flex-col grid grid-rows-3 items-center p-4">
-          
+        <div class="bg-red-100 border rounded-md flex justify-centent items-center">
+            <img src="../assets/logos/logo_preto_1.png" class=""/>
         </div>
       </div>
       <div class="w-full row-span-4 grid grid-row-2 gap-3">
@@ -368,7 +461,7 @@ export default defineComponent({
           </div>
           <div class=" grid grid-cols-5 gap-2">
             <div class="border rounded-md p-2 col-span-3">
-              <ApexChart type="area" height="350" :options="chartInteracoes" :series="seriesInteracoes" />
+              <ApexChart type="bar" height="350" :options="chartMediasPorUsuario" :series="seriesMediasPorUsuario" />
             </div>
             <div class="border rounded-md p-2 col-span-2">
               <ApexChart type="bar" height="350" :options="chartPopulares" :series="seriesPopulares" />
